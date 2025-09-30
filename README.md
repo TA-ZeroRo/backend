@@ -62,6 +62,18 @@ SUPABASE_KEY=your_supabase_key_here
 ### 로컬 환경
 
 ```bash
+# Python 3.10+ 설치 확인
+python --version
+# 만약 Python 3.10+ 아니라면, pip 최신화
+python -m pip install --upgrade pip
+
+# venv 생성
+python -m venv venv
+
+# 활성화
+source venv/bin/activate   # macOS/Linux
+venv\Scripts\activate      # Windows
+
 # 의존성 설치
 pip install -r requirements.txt
 
