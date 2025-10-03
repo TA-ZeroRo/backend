@@ -6,40 +6,50 @@
 
 ```
 backend/
-├── app/                      # FastAPI 소스코드의 메인 디렉토리
-│   ├── main.py               # FastAPI 앱의 시작점. 앱 인스턴스 생성, 미들웨어/라우터 포함
-│   ├── api/                  # API 엔드포인트(라우터)들을 모아두는 곳
-│   │   ├── util/             # API 유틸리티
-│   │   │   ├── exception.py  # API 예외 처리 함수 모음
-│   │   │   └── util.py       # 유틸리티 함수
-│   │   └── v1/               # API 버전 관리 (v1, v2 등)
-│   │       ├── router.py     # v1의 모든 엔드포인트 라우터들을 통합하는 파일
-│   │       └── endpoints/    # 기능별 엔드포인트 파일
+├── app/                      # FastAPI 메인 애플리케이션
+│   ├── __init__.py
+│   ├── main.py              # 앱 시작점
+│   ├── api/                 # API 엔드포인트
+│   │   ├── __init__.py
+│   │   ├── util/            # API 유틸리티
+│   │   │   ├── __init__.py
+│   │   │   ├── exception.py # API 예외 처리 함수 모음
+│   │   │   └── util.py      # 유틸리티 함수
+│   │   └── v1/
+│   │       ├── __init__.py
+│   │       ├── router.py
+│   │       └── endpoints/   # 기능별 엔드포인트
 │   │           ├── __init__.py
-│   │           ├── users.py      # 사용자 조회
-│   │           ├── verification.py # 인증 방식
-│   │           ├── community.py  # 커뮤니티
-│   │           └── leaderBoard.py # 리더보드
-│   │
-│   ├── core/                 # 프로젝트의 핵심 설정
-│   │   └── config.py         # 환경변수, 시크릿 키 등 설정 관리
-│   │
-│   └── services/             # 비즈니스 로직
-│       ├── user/             # 사용자 관련 서비스
-│       │   └── RUD
-│       ├── character/        # 캐릭터 관련 서비스
-
-│       ├── community/        # 커뮤니티 관련 서비스
-│       │   └── CRUD
-│       ├── article/          # 소감문 관련 서비스
-│       │   └── CR
-│       ├── image/            # 이미지 관련 서비스
-│       │   └── CR
-│       ├── quiz/             # 퀴즈 관련 서비스
-│       │   └── R
-│       └── leaderBoard/      # 리더보드 관련 서비스
-│           └── R
-│
+│   │           ├── character.py
+│   │           ├── community.py
+│   │           ├── leaderboard.py
+│   │           ├── point.py
+│   │           ├── users.py
+│   │           └── verification.py
+│   ├── core/                # 핵심 설정
+│   │   ├── __init__.py
+│   │   └── config.py        # 환경변수, 시크릿 키 등 설정 관리
+│   ├── repository/          # 데이터 접근 계층 (Repository Pattern)
+│   │   ├── __init__.py
+│   │   ├── user_repository.py
+│   │   ├── character_repository.py
+│   │   ├── community_repository.py
+│   │   ├── point_repository.py
+│   │   └── ...
+│   ├── schemas/             # Pydantic 스키마 관리
+│   │   ├── __init__.py
+│   │   ├── user_schemas.py
+│   │   ├── character_schemas.py
+│   │   ├── community_schemas.py
+│   │   └── ...
+│   └── services/            # 비즈니스 로직 (리팩토링됨)
+│       ├── __init__.py
+│       ├── user_service.py      # 통합된 사용자 서비스
+│       ├── character_service.py # 통합된 캐릭터 서비스
+│       ├── community_service.py # 통합된 커뮤니티 서비스
+│       ├── point_service.py     # 통합된 포인트 서비스
+│       ├── verification_service.py # 통합된 검증 서비스
+│       └── leaderboard_service.py  # 통합된 리더보드 서비스
 ├── requirements.txt          # 프로젝트 의존성 패키지 목록
 └── README.md                # 프로젝트 문서
 ```
