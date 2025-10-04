@@ -87,8 +87,8 @@ venv\Scripts\activate      # Windows
 # 의존성 설치
 pip install -r requirements.txt
 
-# 개발 서버 실행
-fastapi dev
+# 개발 서버 실행 (TA-ZeroRo\backend 디렉토리에서) 
+fastapi dev app/main.py
 ```
 
 ## API 문서
