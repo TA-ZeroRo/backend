@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from uuid import UUID
 from app.services.verification_service import VerificationService
@@ -126,12 +125,4 @@ async def create_quiz():
 #         raise
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
-=======
-from fastapi import APIRouter
 
-router = APIRouter()
-
-@router.get("/")
-async def get_verification():
-    return {"message": "Verification endpoint"}
->>>>>>> 7406ccff6498dc50cb38d3b18888c73546b52a77
