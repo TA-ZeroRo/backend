@@ -16,7 +16,26 @@ class LeaderboardRepository(BaseRepository):
             .limit(limit)
             .execute()
         )
-        return response.data if response.data else []
+        if not response.data:
+            return []
+
+        # rank 추가 (동률 처리)
+        result = []
+        current_rank = 1
+        prev_points = None
+        
+        for idx, user in enumerate(response.data):
+            current_points = user["total_points"]
+            
+            # 이전 점수와 다르면 순위 업데이트
+            if prev_points is not None and current_points != prev_points:
+                current_rank = idx + 1
+            
+            user['rank'] = current_rank
+            result.append(user)
+            prev_points = current_points
+
+        return result
 
     async def get_user_ranking(self, user_id: str) -> int:
         """특정 사용자의 순위 조회"""

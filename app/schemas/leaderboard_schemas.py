@@ -10,6 +10,7 @@ class LeaderboardUserResponse(BaseModel):
     username: Optional[str]
     user_img: Optional[str]
     total_points: int
+    continuous_days: Optional[int] = None
     rank: Optional[int] = None
 
     class Config:
