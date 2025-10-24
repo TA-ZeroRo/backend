@@ -4,9 +4,10 @@ from fastapi import APIRouter
 router = APIRouter()
 
 # TODO: 엔드포인트 파일들이 생성되면 주석을 해제 해야 함 - JOJO
-from .endpoints import character, community, leaderboard, like, point, users, verification
+from .endpoints import campaign, character, community, leaderboard, like, point, users, verification
 
 # 각 엔드포인트 라우터 등록 (파일 생성 후 활성화)
+router.include_router(campaign.router, prefix="/campaign", tags=["Campaign"])
 router.include_router(character.router, prefix="/character", tags=["Character"])
 router.include_router(community.router, prefix="/community", tags=["Community"])
 router.include_router(leaderboard.router, prefix="/leaderboard", tags=["Leaderboard"])

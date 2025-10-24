@@ -61,3 +61,18 @@ class LikeRepository(BaseRepository):
         """좋아요 존재 여부 확인"""
         like = await self.get_like_by_user_and_post(user_id, post_id)
         return like is not None
+
+    async def get_liked_post_ids_filtered(self, user_id: UUID, post_ids: List[int]) -> List[int]:
+        """사용자가 좋아요를 누른 게시글 ID 목록 (DB 레벨 필터링)"""
+        if not post_ids:
+            return []
+
+        response = (
+            self.supabase
+            .table(self.TABLE_NAME)
+            .select("post_id")
+            .eq("user_id", str(user_id))
+            .in_("post_id", post_ids)
+            .execute()
+        )
+        return [item["post_id"] for item in response.data] if response.data else []
