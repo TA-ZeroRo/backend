@@ -1,0 +1,59 @@
+"""User Service - 사용자 관련 비즈니스 로직"""
+from fastapi import HTTPException
+from uuid import UUID
+from typing import Dict, Any
+from app.repository.user_repository import UserRepository
+from app.schemas.user_schemas import UserCreate, UserUpdate
+
+
+class UserService:
+    """사용자 관련 비즈니스 로직을 처리하는 서비스"""
+
+    def __init__(self):
+        self.user_repo = UserRepository()
+
+    async def get_user_by_id(self, user_id: UUID) -> Dict[str, Any]:
+        """사용자 ID로 사용자 정보 조회"""
+        user = await self.user_repo.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="해당 user를 찾을 수 없습니다.")
+        return {"user": user}
+
+    async def create_user(self, user_data: UserCreate) -> Dict[str, Any]:
+        """새로운 사용자 생성"""
+        # 이미 존재하는 사용자인지 확인
+        if await self.user_repo.check_user_exists(user_data.id):
+            raise HTTPException(status_code=409, detail="이미 해당 uuid로 등록된 프로필이 존재합니다.")
+
+        # 사용자 생성
+        created_user = await self.user_repo.create_user(user_data.model_dump())
+        if not created_user:
+            raise HTTPException(status_code=500, detail="유저 생성에 실패했습니다.")
+
+        # 생성된 사용자 정보 조회 (추가 정보 포함)
+        user = await self.user_repo.get_user_by_id(created_user["id"])
+        return {"user": user}
+
+    async def update_user(self, user_id: UUID, user_data: UserUpdate) -> Dict[str, Any]:
+        """사용자 정보 업데이트"""
+        # 업데이트할 데이터만 추출 (None이 아닌 값만)
+        update_data = {k: v for k, v in user_data.model_dump().items() if v is not None}
+
+        if not update_data:
+            raise HTTPException(status_code=400, detail="업데이트할 데이터가 없습니다.")
+
+        updated_user = await self.user_repo.update_user(user_id, update_data)
+        if not updated_user:
+            raise HTTPException(status_code=500, detail="유저 수정에 실패했습니다.")
+
+        # 업데이트된 사용자 정보 조회
+        user = await self.user_repo.get_user_by_id(user_id)
+        return {"user": user}
+
+    async def delete_user(self, user_id: UUID) -> Dict[str, str]:
+        """사용자 삭제"""
+        success = await self.user_repo.delete_user(user_id)
+        if not success:
+            raise HTTPException(status_code=500, detail="유저 삭제에 실패했습니다.")
+
+        return {"message": "유저가 성공적으로 삭제되었습니다."}
