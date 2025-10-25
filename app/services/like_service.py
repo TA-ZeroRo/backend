@@ -61,7 +61,7 @@ class LikeService:
             if not success:
                 raise HTTPException(status_code=500, detail="좋아요 삭제에 실패했습니다.")
 
-            # 게시글의 좋아요 수 감소 및 최신 카운트 조회 (2번 왕복 → 2번 왕복으로 최적화)
+            # 게시글의 좋아요 수 감소 및 최신 카운트 조회
             likes_count = await self.community_repo.decrement_likes_and_get_count(post_id)
 
             return {
@@ -80,7 +80,7 @@ class LikeService:
             if not created_like:
                 raise HTTPException(status_code=500, detail="좋아요 추가에 실패했습니다.")
 
-            # 게시글의 좋아요 수 증가 및 최신 카운트 조회 (2번 왕복 → 2번 왕복으로 최적화)
+            # 게시글의 좋아요 수 증가 및 최신 카운트 조회
             likes_count = await self.community_repo.increment_likes_and_get_count(post_id)
 
             return {
