@@ -14,49 +14,6 @@ class LikeService:
         self.like_repo = LikeRepository()
         self.community_repo = CommunityRepository()
 
-    async def create_like(self, user_id: UUID, post_id: int) -> Dict[str, Any]:
-        """좋아요 생성 (DB Unique 제약조건 활용)"""
-        try:
-            # 좋아요 생성 (DB의 UNIQUE 제약조건이 중복 방지)
-            like_data = {
-                "user_id": str(user_id),
-                "post_id": post_id
-            }
-
-            created_like = await self.like_repo.create_like(like_data)
-            if not created_like:
-                raise HTTPException(status_code=500, detail="좋아요 생성에 실패했습니다.")
-
-            # 게시글의 좋아요 수 증가
-            await self.community_repo.increment_likes(post_id)
-
-            return {"message": "좋아요가 성공적으로 추가되었습니다.", "like": created_like}
-
-        except Exception as e:
-            error_msg = str(e).lower()
-            # Supabase/PostgreSQL에서 Unique 제약조건 위반 시 에러 감지
-            if "duplicate" in error_msg or "unique" in error_msg or "already exists" in error_msg:
-                raise HTTPException(status_code=409, detail="이미 좋아요를 눌렀습니다.")
-            # 다른 에러는 그대로 전파
-            raise HTTPException(status_code=500, detail=f"좋아요 생성 중 오류가 발생했습니다: {str(e)}")
-
-    async def delete_like(self, user_id: UUID, post_id: int) -> Dict[str, str]:
-        """좋아요 삭제"""
-        # 좋아요 찾기
-        existing_like = await self.like_repo.get_like_by_user_and_post(user_id, post_id)
-        if not existing_like:
-            raise HTTPException(status_code=404, detail="좋아요를 찾을 수 없습니다.")
-
-        # 좋아요 삭제
-        success = await self.like_repo.delete_like(existing_like["id"])
-        if not success:
-            raise HTTPException(status_code=500, detail="좋아요 삭제에 실패했습니다.")
-
-        # 게시글의 좋아요 수 감소
-        await self.community_repo.decrement_likes(post_id)
-
-        return {"message": "좋아요가 성공적으로 삭제되었습니다."}
-
     async def get_likes_by_user(self, user_id: UUID) -> Dict[str, List[Dict[str, Any]]]:
         """사용자의 좋아요 목록 조회"""
         likes = await self.like_repo.get_likes_by_user_id(user_id)
