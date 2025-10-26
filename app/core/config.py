@@ -1,11 +1,8 @@
 from dotenv import load_dotenv
 import os
-from pathlib import Path
 from typing import Optional
 
-# .env 파일 경로 명시적으로 지정
-env_path = Path(__file__).parent.parent / ".env"
-load_dotenv(dotenv_path=env_path)
+load_dotenv()
 
 # Gemini API 설정
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
