@@ -3,7 +3,6 @@ from fastapi import HTTPException
 from typing import Dict, Any
 from google import genai
 from google.genai import types
-from sentence_transformers import SentenceTransformer, util
 import json
 
 from app.core.config import get_gemini_api_key
