@@ -37,3 +37,29 @@ class PostResponse(PostBase):
     class Config:
         from_attributes = True
 
+# ===== Comment 스키마 =====
+class CommentBase(BaseModel):
+    """Comment 기본 스키마"""
+    content: str
+
+
+class CommentCreate(CommentBase):
+    """Comment 생성 스키마"""
+    user_id: UUID
+
+
+class CommentUpdate(BaseModel):
+    """Comment 업데이트 스키마"""
+    content: str
+
+
+class CommentResponse(CommentBase):
+    """Comment 응답 스키마"""
+    id: int
+    user_id: UUID
+    post_id: int
+    created_at: datetime
+    profiles: Optional[Dict[str, Any]] = None  # user_img, username 포함
+
+    class Config:
+        from_attributes = True
