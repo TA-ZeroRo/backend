@@ -30,6 +30,7 @@ class PostResponse(PostBase):
     id: int
     user_id: UUID
     likes_count: int = 0
+    comments_count: int = 0  # DB 스키마와 일치
     created_at: datetime
     profiles: Optional[Dict[str, Any]] = None  # user_img, username 포함
 

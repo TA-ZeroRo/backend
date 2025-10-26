@@ -17,18 +17,15 @@ class CommunityService:
         if offset is None:
             raise HTTPException(status_code=400, detail="offset는 필수입니다.")
 
-        # Supabase range를 사용한 페이지네이션
-        limit = offset + 10
-        posts = await self.community_repo.get_all_posts()
+        # Repository 계층에서 페이지네이션 및 필터링 처리
+        limit = 10
+        posts = await self.community_repo.get_posts_paginated(
+            offset=offset,
+            limit=limit,
+            user_id=user_id
+        )
 
-        # user_id 필터링 (옵션)
-        if user_id:
-            posts = [post for post in posts if str(post.get("user_id")) == user_id]
-
-        # 페이지네이션 적용
-        paginated_posts = posts[offset:limit]
-
-        return {"posts": paginated_posts}
+        return {"posts": posts}
 
     async def get_single_post(self, post_id: int) -> Dict[str, Any]:
         """
