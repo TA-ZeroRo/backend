@@ -1,38 +1,103 @@
 """Verification Service - 인증 관련 비즈니스 로직"""
 from fastapi import HTTPException
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from google import genai
 from google.genai import types
 import json
+from enum import IntEnum
+from dataclasses import dataclass
 
 from app.core.config import get_gemini_api_key
 from app.repository.base_repository import BaseRepository
 
 
-# 카테고리 매핑
-MAIN_CATEGORIES = {
-    0: '올바른 분리배출',
-    1: '다회용품 사용',
-    2: '자원 절약 및 재활용',
-    3: '건의하기'
-}
+# ===== 카테고리 정의 =====
+class MainCategory(IntEnum):
+    """메인 카테고리"""
+    PROPER_DISPOSAL = 0
+    REUSABLE_ITEMS = 1
+    RESOURCE_SAVING = 2
+    SUGGESTION = 3
 
-SUB_CATEGORIES = {
-    # mainIndex: 0 (올바른 분리배출)
-    0: {'name': '페트병 라벨 제거', 'mainIndex': 0},
-    1: {'name': '택배 상자 테이프/송장 제거', 'mainIndex': 0},
-    2: {'name': '내용물이 비워진 우유갑/주스팩', 'mainIndex': 0},
-    3: {'name': '깨끗한 스티로폼 박스', 'mainIndex': 0},
+    @property
+    def display_name(self) -> str:
+        """카테고리의 한글 이름 반환"""
+        names = {
+            0: '올바른 분리배출',
+            1: '다회용품 사용',
+            2: '자원 절약 및 재활용',
+            3: '건의하기'
+        }
+        return names[self.value]
 
-    # mainIndex: 1 (다회용품 사용)
-    4: {'name': '카페/식당에서의 텀블러 사용', 'mainIndex': 1},
-    5: {'name': '다회용기(용기내) 포장', 'mainIndex': 1},
-    6: {'name': '장바구니 사용', 'mainIndex': 1},
 
-    # mainIndex: 2 (자원 절약 및 재활용)
-    7: {'name': '전자영수증 발급 화면', 'mainIndex': 2},
-    8: {'name': '사용하지 않는 플러그 뽑기', 'mainIndex': 2},
-}
+@dataclass
+class SubCategory:
+    """서브 카테고리"""
+    id: int
+    name: str
+    main_category: MainCategory
+
+    @property
+    def main_category_id(self) -> int:
+        """메인 카테고리 ID 반환"""
+        return self.main_category.value
+
+
+# 서브 카테고리 목록
+SUB_CATEGORIES = [
+    # 올바른 분리배출
+    SubCategory(0, '페트병 라벨 제거', MainCategory.PROPER_DISPOSAL),
+    SubCategory(1, '택배 상자 테이프/송장 제거', MainCategory.PROPER_DISPOSAL),
+    SubCategory(2, '내용물이 비워진 우유갑/주스팩', MainCategory.PROPER_DISPOSAL),
+    SubCategory(3, '깨끗한 스티로폼 박스', MainCategory.PROPER_DISPOSAL),
+
+    # 다회용품 사용
+    SubCategory(4, '카페/식당에서의 텀블러 사용', MainCategory.REUSABLE_ITEMS),
+    SubCategory(5, '다회용기(용기내) 포장', MainCategory.REUSABLE_ITEMS),
+    SubCategory(6, '장바구니 사용', MainCategory.REUSABLE_ITEMS),
+
+    # 자원 절약 및 재활용
+    SubCategory(7, '전자영수증 발급 화면', MainCategory.RESOURCE_SAVING),
+    SubCategory(8, '사용하지 않는 플러그 뽑기', MainCategory.RESOURCE_SAVING),
+]
+
+# 빠른 조회를 위한 딕셔너리
+_SUB_CATEGORY_MAP: Dict[int, SubCategory] = {sc.id: sc for sc in SUB_CATEGORIES}
+
+
+def _get_main_category(category_id: int) -> Optional[MainCategory]:
+    """메인 카테고리 ID로 MainCategory 반환 (내부 헬퍼)"""
+    try:
+        return MainCategory(category_id)
+    except ValueError:
+        return None
+
+
+def _get_sub_category(sub_category_id: int) -> Optional[SubCategory]:
+    """서브 카테고리 ID로 SubCategory 반환 (내부 헬퍼)"""
+    return _SUB_CATEGORY_MAP.get(sub_category_id)
+
+
+def _validate_category_pair(main_category_id: int, sub_category_id: int) -> tuple[bool, Optional[str]]:
+    """
+    메인 카테고리와 서브 카테고리의 유효성 및 관계 검증 (내부 헬퍼)
+
+    Returns:
+        (is_valid, error_message): 유효하면 (True, None), 무효하면 (False, 에러 메시지)
+    """
+    main_category = _get_main_category(main_category_id)
+    if not main_category:
+        return False, f"Invalid main category index: {main_category_id}"
+
+    sub_category = _get_sub_category(sub_category_id)
+    if not sub_category:
+        return False, f"Invalid sub category index: {sub_category_id}"
+
+    if sub_category.main_category_id != main_category_id:
+        return False, f"Sub category {sub_category_id} does not belong to main category {main_category_id}"
+
+    return True, None
 
 # 이미지 검증 스키마
 category_verification_schema = types.Schema(
@@ -72,22 +137,18 @@ class VerificationService:
         sub_category_index: int
     ) -> str:
         """카테고리별 이미지 검증"""
-        # 카테고리 유효성 검증
-        main_category = MAIN_CATEGORIES.get(main_category_index)
-        if not main_category:
-            raise ValueError(f"Invalid main category index: {main_category_index}")
+        # 카테고리 유효성 및 관계 검증
+        is_valid, error_message = _validate_category_pair(main_category_index, sub_category_index)
+        if not is_valid:
+            raise ValueError(error_message)
 
-        sub_category = SUB_CATEGORIES.get(sub_category_index)
-        if not sub_category:
-            raise ValueError(f"Invalid sub category index: {sub_category_index}")
+        # 서브 카테고리 정보 가져오기 (검증 완료했으므로 None이 아님)
+        sub_category = _get_sub_category(sub_category_index)
+        if not sub_category:  # 타입 체커를 위한 추가 검증
+            raise ValueError(f"Sub category {sub_category_index} not found")
 
-        if sub_category['mainIndex'] != main_category_index:
-            raise ValueError(
-                f"Sub category {sub_category_index} does not belong to main category {main_category_index}"
-            )
-
-        main_category_name = MAIN_CATEGORIES[main_category_index]
-        sub_category_name = sub_category['name']
+        main_category_name = sub_category.main_category.display_name
+        sub_category_name = sub_category.name
 
         # 시스템 프롬프트 생성
         system_prompt = f"""
