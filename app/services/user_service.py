@@ -17,7 +17,7 @@ class UserService:
         user = await self.user_repo.get_user_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="해당 user를 찾을 수 없습니다.")
-        return {"user": user}
+        return user
 
     async def create_user(self, user_data: UserCreate) -> Dict[str, Any]:
         """새로운 사용자 생성"""
@@ -32,7 +32,9 @@ class UserService:
 
         # 생성된 사용자 정보 조회 (추가 정보 포함)
         user = await self.user_repo.get_user_by_id(created_user["id"])
-        return {"user": user}
+        if not user:
+            raise HTTPException(status_code=500, detail="생성된 유저 조회에 실패했습니다.")
+        return user
 
     async def update_user(self, user_id: UUID, user_data: UserUpdate) -> Dict[str, Any]:
         """사용자 정보 업데이트"""
@@ -48,7 +50,9 @@ class UserService:
 
         # 업데이트된 사용자 정보 조회
         user = await self.user_repo.get_user_by_id(user_id)
-        return {"user": user}
+        if not user:
+            raise HTTPException(status_code=500, detail="수정된 유저 조회에 실패했습니다.")
+        return user
 
     async def delete_user(self, user_id: UUID) -> Dict[str, str]:
         """사용자 삭제"""
