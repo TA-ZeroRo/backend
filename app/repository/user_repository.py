@@ -19,15 +19,15 @@ class UserRepository(BaseRepository):
         # 필수 필드 보장
         user_data.setdefault("total_points", 0)
         user_data.setdefault("continuous_days", 0)
-        user_data.setdefault("last_active_at", datetime.now().isoformat())
-        user_data.setdefault("created_at", datetime.now().isoformat())
+        user_data.setdefault("last_active_at", datetime.now())
+        user_data.setdefault("created_at", datetime.now())
         return await self.create(self.TABLE_NAME, user_data)
 
     async def update_user(self, user_id: UUID, user_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """사용자 정보 업데이트"""
         # 마지막 활동 시간 자동 업데이트
         update_data = user_data.copy()
-        update_data["last_active_at"] = datetime.now().isoformat()
+        update_data["last_active_at"] = datetime.now()
         return await self.update(self.TABLE_NAME, str(user_id), update_data)
         
 
