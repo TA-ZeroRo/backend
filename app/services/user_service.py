@@ -25,8 +25,11 @@ class UserService:
         if await self.user_repo.check_user_exists(user_data.id):
             raise HTTPException(status_code=409, detail="이미 해당 uuid로 등록된 프로필이 존재합니다.")
 
-        # 사용자 생성
-        created_user = await self.user_repo.create_user(user_data.model_dump())
+        # 사용자 생성 (UUID를 문자열로 변환)
+        user_dict = user_data.model_dump()
+        user_dict["id"] = str(user_dict["id"])  # UUID → str
+
+        created_user = await self.user_repo.create_user(user_dict)
         if not created_user:
             raise HTTPException(status_code=500, detail="유저 생성에 실패했습니다.")
 
