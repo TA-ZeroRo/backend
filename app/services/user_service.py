@@ -25,9 +25,13 @@ class UserService:
         if await self.user_repo.check_user_exists(user_data.id):
             raise HTTPException(status_code=409, detail="이미 해당 uuid로 등록된 프로필이 존재합니다.")
 
-        # 사용자 생성 (UUID를 문자열로 변환)
+        # 사용자 생성 (UUID, datetime을 문자열로 변환)
         user_dict = user_data.model_dump()
         user_dict["id"] = str(user_dict["id"])  # UUID → str
+
+        # datetime 객체를 ISO 형식 문자열로 변환
+        if "last_active_at" in user_dict and user_dict["last_active_at"]:
+            user_dict["last_active_at"] = user_dict["last_active_at"].isoformat()
 
         created_user = await self.user_repo.create_user(user_dict)
         if not created_user:
@@ -46,6 +50,10 @@ class UserService:
 
         if not update_data:
             raise HTTPException(status_code=400, detail="업데이트할 데이터가 없습니다.")
+
+        # datetime 객체를 ISO 형식 문자열로 변환
+        if "last_active_at" in update_data and update_data["last_active_at"]:
+            update_data["last_active_at"] = update_data["last_active_at"].isoformat()
 
         updated_user = await self.user_repo.update_user(user_id, update_data)
         if not updated_user:

@@ -17,7 +17,7 @@ class UserRepository(BaseRepository):
     async def create_user(self, user_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """새로운 사용자 생성 (타임스탬프 자동 설정)"""
         # created_at은 DB에서 자동 생성되지만, 명시적으로 설정 가능
-        user_data.setdefault("created_at", datetime.now())
+        user_data.setdefault("created_at", datetime.now().isoformat())
         return await self.create(self.TABLE_NAME, user_data)
 
     async def update_user(self, user_id: UUID, user_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -25,7 +25,7 @@ class UserRepository(BaseRepository):
         update_data = user_data.copy()
         # last_active_at이 명시적으로 제공되지 않은 경우에만 자동 설정
         if "last_active_at" not in update_data:
-            update_data["last_active_at"] = datetime.now()
+            update_data["last_active_at"] = datetime.now().isoformat()
         return await self.update(self.TABLE_NAME, str(user_id), update_data)
         
 
