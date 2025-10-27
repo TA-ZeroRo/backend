@@ -7,18 +7,18 @@ from datetime import datetime
 
 class UserBase(BaseModel):
     """User 기본 스키마"""
-    username: Optional[str] = None
     user_img: Optional[str] = None
     total_points: Optional[int] = 0
     continuous_days: Optional[int] = 0
-    region: Optional[str] = None
     characters: Optional[List[str]] = None
     last_active_at: Optional[datetime] = None
 
 
 class UserCreate(UserBase):
-    """User 생성 스키마"""
+    """User 생성 스키마 (id, username, region 필수)"""
     id: UUID
+    username: str
+    region: str
 
 
 class UserUpdate(BaseModel):
@@ -34,6 +34,8 @@ class UserUpdate(BaseModel):
 class UserResponse(UserBase):
     """User 응답 스키마"""
     id: UUID
+    username: str
+    region: str
     continuous_days: int = 0
     created_at: Optional[datetime] = None
 
