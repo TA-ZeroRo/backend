@@ -1,5 +1,5 @@
 """User 관련 Pydantic 스키마"""
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
 from uuid import UUID
 from datetime import datetime
@@ -10,7 +10,7 @@ class UserBase(BaseModel):
     user_img: Optional[str] = None
     total_points: Optional[int] = 0
     continuous_days: Optional[int] = 0
-    characters: Optional[List[str]] = None
+    characters: Optional[List[str]] = []
     last_active_at: Optional[datetime] = None
 
 
@@ -32,12 +32,16 @@ class UserUpdate(BaseModel):
 
 
 class UserResponse(UserBase):
-    """User 응답 스키마"""
+    """User 응답 스키마 (UUID는 JSON 직렬화 시 자동으로 문자열로 변환)"""
     id: UUID
     username: str
     region: str
     continuous_days: int = 0
     created_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: lambda v: str(v)
+        }
+    )
