@@ -19,11 +19,10 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     """User 생성 스키마"""
     id: UUID
-    username: str  # 필수로 유지
 
 
 class UserUpdate(BaseModel):
-    """User 업데이트 스키마"""
+    """User 업데이트 스키마 (continuous_days는 시스템 자동 관리)"""
     username: Optional[str] = None
     user_img: Optional[str] = None
     total_points: Optional[int] = None
