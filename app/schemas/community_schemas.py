@@ -20,6 +20,7 @@ class PostCreate(PostBase):
 
 class PostUpdate(BaseModel):
     """Post 업데이트 스키마"""
+    user_id: UUID  # 권한 검증용
     title: Optional[str] = None
     content: Optional[str] = None
     image_url: Optional[str] = None
@@ -50,7 +51,18 @@ class CommentCreate(CommentBase):
 
 class CommentUpdate(BaseModel):
     """Comment 업데이트 스키마"""
+    user_id: UUID  # 권한 검증용
     content: str
+
+
+class PostDelete(BaseModel):
+    """Post 삭제 스키마"""
+    user_id: UUID
+
+
+class CommentDelete(BaseModel):
+    """Comment 삭제 스키마"""
+    user_id: UUID
 
 
 class CommentResponse(CommentBase):
