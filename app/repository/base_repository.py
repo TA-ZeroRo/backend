@@ -1,6 +1,7 @@
 """Base Repository 클래스"""
 from typing import Optional, List, Dict, Any
 from supabase import create_client, Client
+from postgrest.exceptions import APIError
 from app.core.config import get_supabase_config
 
 
@@ -13,15 +14,21 @@ class BaseRepository:
 
     async def find_by_id(self, table: str, id_value: str, id_column: str = "id") -> Optional[Dict[str, Any]]:
         """ID로 단일 레코드 조회"""
-        response = (
-            self.supabase
-            .table(table)
-            .select("*")
-            .eq(id_column, id_value)
-            .single()
-            .execute()
-        )
-        return response.data if response.data else None
+        try:
+            response = (
+                self.supabase
+                .table(table)
+                .select("*")
+                .eq(id_column, id_value)
+                .single()
+                .execute()
+            )
+            return response.data if response.data else None
+        except APIError as e:
+            # PGRST116: 결과가 0개일 때 발생하는 에러
+            if e.code == "PGRST116":
+                return None
+            raise  # 다른 에러는 그대로 전파
 
     async def find_all(self, table: str, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """모든 레코드 조회 (필터 적용 가능)"""
