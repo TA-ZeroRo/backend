@@ -18,6 +18,9 @@ class CommunityService:
         if offset is None:
             raise HTTPException(status_code=400, detail="offset는 필수입니다.")
 
+        if offset < 0:
+            raise HTTPException(status_code=400, detail="offset은 0 이상이어야 합니다.")
+
         # Repository 계층에서 페이지네이션 및 필터링 처리
         limit = 10
         posts = await self.community_repo.get_posts_paginated(
@@ -101,11 +104,21 @@ class CommunityService:
     # ===== 댓글 관련 메서드 =====
     async def get_comments(self, post_id: int) -> List[Dict[str, Any]]:
         """특정 게시글의 댓글 목록 조회"""
+        # 게시글 존재 여부 확인
+        post = await self.community_repo.get_post_by_id(post_id)
+        if not post:
+            raise HTTPException(status_code=404, detail="해당 게시글을 찾을 수 없습니다.")
+
         comments = await self.community_repo.get_comments_by_post_id(post_id)
         return comments
 
     async def create_comment(self, post_id: int, comment_data: CommentCreate) -> Dict[str, Any]:
         """새로운 댓글 생성"""
+        # 게시글 존재 여부 확인
+        post = await self.community_repo.get_post_by_id(post_id)
+        if not post:
+            raise HTTPException(status_code=404, detail="해당 게시글을 찾을 수 없습니다.")
+
         insert_data = {
             "post_id": post_id,
             "user_id": str(comment_data.user_id),
@@ -120,10 +133,14 @@ class CommunityService:
 
     async def update_comment(self, post_id: int, comment_id: int, comment_data: CommentUpdate) -> Dict[str, Any]:
         """댓글 업데이트 (권한 검증 포함)"""
-        # 작성자 권한 검증
+        # 댓글 존재 여부 및 작성자 권한 검증
         comment = await self.community_repo.get_comment_by_id(comment_id)
         if not comment:
             raise HTTPException(status_code=404, detail="해당 댓글을 찾을 수 없습니다.")
+
+        # 댓글이 해당 게시글에 속하는지 확인
+        if comment.get("post_id") != post_id:
+            raise HTTPException(status_code=400, detail="해당 게시글의 댓글이 아닙니다.")
 
         if str(comment.get("user_id")) != str(comment_data.user_id):
             raise HTTPException(status_code=403, detail="댓글을 수정할 권한이 없습니다.")
@@ -138,10 +155,14 @@ class CommunityService:
 
     async def delete_comment(self, post_id: int, comment_id: int, delete_data: CommentDelete) -> Dict[str, str]:
         """댓글 삭제 (권한 검증 포함)"""
-        # 작성자 권한 검증
+        # 댓글 존재 여부 및 작성자 권한 검증
         comment = await self.community_repo.get_comment_by_id(comment_id)
         if not comment:
             raise HTTPException(status_code=404, detail="해당 댓글을 찾을 수 없습니다.")
+
+        # 댓글이 해당 게시글에 속하는지 확인
+        if comment.get("post_id") != post_id:
+            raise HTTPException(status_code=400, detail="해당 게시글의 댓글이 아닙니다.")
 
         if str(comment.get("user_id")) != str(delete_data.user_id):
             raise HTTPException(status_code=403, detail="댓글을 삭제할 권한이 없습니다.")
