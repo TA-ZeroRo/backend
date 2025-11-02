@@ -1,4 +1,4 @@
-"""Report Service - 월간 보고서 관련 비즈니스 로직"""
+"""Report Service - 보고서 관련 비즈니스 로직"""
 from fastapi import HTTPException
 from uuid import UUID
 from datetime import date, datetime
@@ -22,13 +22,42 @@ from app.schemas.report_schemas import (
 
 
 class ReportService:
-    """월간 보고서 관련 비즈니스 로직을 처리하는 서비스"""
+    """보고서 관련 비즈니스 로직을 처리하는 서비스"""
 
     FIRST_VIEW_REWARD_POINTS = 20  # 첫 열람 시 지급 포인트
 
     def __init__(self):
         self.report_repo = ReportRepository()
         self.user_repo = UserRepository()
+
+    async def get_latest_monthly_report(self, user_id: UUID) -> MonthlyReportResponse:
+        """
+        가장 최근 보고서 조회
+
+        Parameters:
+        - user_id: 사용자 ID
+
+        Returns:
+        - MonthlyReportResponse: 이전 달 보고서 데이터
+        """
+        # 현재 날짜 기준 이전 달 계산
+        today = date.today()
+
+        if today.month == 1:
+            # 1월인 경우 작년 12월
+            previous_year = today.year - 1
+            previous_month = 12
+        else:
+            # 그 외는 이번 년도의 이전 달
+            previous_year = today.year
+            previous_month = today.month - 1
+
+        # 이전 달 보고서 조회
+        return await self.get_monthly_report(
+            user_id=user_id,
+            year=previous_year,
+            month=previous_month
+        )
 
     async def get_monthly_report(
         self,
@@ -37,7 +66,7 @@ class ReportService:
         month: int
     ) -> MonthlyReportResponse:
         """
-        월간 보고서 조회
+        보고서 조회
 
         Parameters:
         - user_id: 사용자 ID
@@ -45,7 +74,7 @@ class ReportService:
         - month: 월 (1-12)
 
         Returns:
-        - MonthlyReportResponse: 월간 보고서 데이터
+        - MonthlyReportResponse: 보고서 데이터
         """
         # 월 유효성 검증
         if not (1 <= month <= 12):
