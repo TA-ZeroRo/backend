@@ -4,3 +4,4 @@ demo.py
 *\__pycache__
 __pycache__/
 venv/*
+.claude/*
