@@ -1,5 +1,5 @@
 """Community (Post) 관련 Pydantic 스키마"""
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, Dict, Any
 from uuid import UUID
 from datetime import datetime
@@ -35,8 +35,12 @@ class PostResponse(PostBase):
     created_at: datetime
     profiles: Optional[Dict[str, Any]] = None  # user_img, username 포함
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: lambda v: str(v)
+        }
+    )
 
 # ===== Comment 스키마 =====
 class CommentBase(BaseModel):
@@ -73,5 +77,9 @@ class CommentResponse(CommentBase):
     created_at: datetime
     profiles: Optional[Dict[str, Any]] = None  # user_img, username 포함
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: lambda v: str(v)
+        }
+    )

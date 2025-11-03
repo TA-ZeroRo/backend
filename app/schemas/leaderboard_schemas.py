@@ -1,5 +1,5 @@
 """Leaderboard 관련 Pydantic 스키마"""
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from uuid import UUID
 
@@ -12,5 +12,9 @@ class LeaderboardUserResponse(BaseModel):
     total_points: int
     rank: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: lambda v: str(v)
+        }
+    )

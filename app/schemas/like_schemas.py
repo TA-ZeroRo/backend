@@ -1,5 +1,5 @@
 """Like 관련 Pydantic 스키마"""
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 from datetime import datetime
 
@@ -17,5 +17,9 @@ class LikeResponse(BaseModel):
     post_id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: lambda v: str(v)
+        }
+    )
