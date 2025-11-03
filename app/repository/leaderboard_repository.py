@@ -13,10 +13,15 @@ class LeaderboardRepository(BaseRepository):
             .table("profiles")
             .select("id, username, user_img, total_points, continuous_days")
             .order("total_points", desc=True)
+            .order("continuous_days", desc=True)
             .limit(limit)
             .execute()
         )
-        return response.data if response.data else []
+        data = response.data if response.data else []
+        # Add sequential rank based on current ordering
+        for index, item in enumerate(data, start=1):
+            item["rank"] = index
+        return data
 
     async def get_user_ranking(self, user_id: str) -> int:
         """특정 사용자의 순위 조회"""
