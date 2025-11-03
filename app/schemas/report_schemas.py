@@ -10,6 +10,13 @@ class UserInfo(BaseModel):
     id: UUID
     username: str
 
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: lambda v: str(v)
+        }
+    )
+
 
 class Period(BaseModel):
     """보고서 기간"""
@@ -70,4 +77,9 @@ class MonthlyReportResponse(BaseModel):
     tmi: TMI
     reward: Reward
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: lambda v: str(v)
+        }
+    )
