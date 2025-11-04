@@ -73,6 +73,7 @@ class MonthlyReportResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         json_encoders={
+
             UUID: lambda v: str(v),
             date: lambda v: v.isoformat()
         }
