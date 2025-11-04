@@ -1,7 +1,7 @@
 """Report Repository"""
 from typing import List, Dict, Any, Optional
 from uuid import UUID
-from datetime import date
+from datetime import date, timedelta
 from app.repository.base_repository import BaseRepository
 
 
@@ -31,7 +31,7 @@ class ReportRepository(BaseRepository):
             .select("campaign_id, campaigns(id, title, description)")
             .eq("user_id", str(user_id))
             .gte("started_at", start_date.isoformat())
-            .lte("started_at", end_date.isoformat())
+            .lt("started_at", (end_date + timedelta(days=1)).isoformat())
             .execute()
         )
 
@@ -71,7 +71,7 @@ class ReportRepository(BaseRepository):
             .eq("user_id", str(user_id))
             .eq("status", "COMPLETED")
             .gte("completed_at", start_date.isoformat())
-            .lte("completed_at", end_date.isoformat())
+            .lt("completed_at", (end_date + timedelta(days=1)).isoformat())
             .execute()
         )
 

@@ -70,4 +70,10 @@ class MonthlyReportResponse(BaseModel):
     tmi: TMI
     reward: Reward
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: lambda v: str(v),
+            date: lambda v: v.isoformat()
+        }
+    )
