@@ -24,6 +24,13 @@ class CampaignStatus(str, Enum):
     EXPIRED = "EXPIRED"  # 기간 만료
 
 
+class SubmissionType(str, Enum):
+    """캠페인 제출 방식"""
+    RPA_FORM_SUBMIT = "RPA_FORM_SUBMIT"  # RPA 폼 자동 제출
+    DIRECT_API = "DIRECT_API"            # 직접 API 연동
+    MANUAL_GUIDE = "MANUAL_GUIDE"        # 수동 안내
+
+
 # ===== Campaign 응답 스키마 =====
 class CampaignResponse(BaseModel):
     """Campaign 응답 스키마"""
@@ -38,6 +45,7 @@ class CampaignResponse(BaseModel):
     region: Optional[str] = None
     category: Optional[CampaignCategory] = None
     status: CampaignStatus
+    submission_type: Optional[SubmissionType] = None
     updated_at: datetime
 
     class Config:
