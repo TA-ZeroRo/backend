@@ -45,3 +45,69 @@ class UserRepository(BaseRepository):
             .execute()
         )
         return bool(response.data)
+
+    async def add_points(self, user_id: UUID, points: int) -> Optional[Dict[str, Any]]:
+        """
+        사용자 포인트 증가
+
+        Parameters:
+        -----------
+        user_id : UUID
+            사용자 ID
+        points : int
+            증가시킬 포인트
+
+        Returns:
+        --------
+        Optional[Dict[str, Any]]
+            업데이트된 사용자 정보
+        """
+        # 현재 사용자 정보 조회
+        user = await self.get_user_by_id(user_id)
+        if not user:
+            return None
+
+        # 새로운 total_points 계산
+        current_points = user.get("total_points", 0)
+        new_points = current_points + points
+
+        # 포인트 업데이트
+        update_data = {
+            "total_points": new_points,
+            "last_active_at": datetime.now().isoformat()
+        }
+
+        return await self.update(self.TABLE_NAME, str(user_id), update_data)
+
+    async def subtract_points(self, user_id: UUID, points: int) -> Optional[Dict[str, Any]]:
+        """
+        사용자 포인트 차감
+
+        Parameters:
+        -----------
+        user_id : UUID
+            사용자 ID
+        points : int
+            차감할 포인트
+
+        Returns:
+        --------
+        Optional[Dict[str, Any]]
+            업데이트된 사용자 정보
+        """
+        # 현재 사용자 정보 조회
+        user = await self.get_user_by_id(user_id)
+        if not user:
+            return None
+
+        # 새로운 total_points 계산 (음수 방지)
+        current_points = user.get("total_points", 0)
+        new_points = max(0, current_points - points)
+
+        # 포인트 업데이트
+        update_data = {
+            "total_points": new_points,
+            "last_active_at": datetime.now().isoformat()
+        }
+
+        return await self.update(self.TABLE_NAME, str(user_id), update_data)
