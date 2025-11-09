@@ -10,13 +10,6 @@ class UserInfo(BaseModel):
     id: UUID
     username: str
 
-    model_config = ConfigDict(
-        from_attributes=True,
-        json_encoders={
-            UUID: lambda v: str(v)
-        }
-    )
-
 
 class Period(BaseModel):
     """보고서 기간"""
@@ -80,6 +73,8 @@ class MonthlyReportResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         json_encoders={
-            UUID: lambda v: str(v)
+
+            UUID: lambda v: str(v),
+            date: lambda v: v.isoformat()
         }
     )
