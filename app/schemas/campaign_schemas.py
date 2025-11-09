@@ -1,6 +1,6 @@
 """Campaign 관련 Pydantic 스키마"""
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Dict, Any
 from datetime import date, datetime
 from enum import Enum
 
@@ -47,6 +47,13 @@ class CampaignResponse(BaseModel):
     status: CampaignStatus
     submission_type: Optional[SubmissionType] = None
     updated_at: datetime
+
+    # RPA 하이브리드 구조 (로그인 공유 + 폼 개별)
+    rpa_site_config_id: Optional[int] = Field(None, description="RPA 사이트 설정 ID (로그인 공유)")
+    rpa_form_url: Optional[str] = Field(None, description="RPA 폼 제출 URL (Campaign별)")
+    rpa_form_config: Optional[Dict[str, Any]] = Field(None, description="RPA 폼 셀렉터 설정 (Campaign별)")
+    rpa_field_mapping: Optional[Dict[str, str]] = Field(None, description="submission_data → 폼 셀렉터 매핑")
+    rpa_form_selector_strategies: Optional[Dict[str, Any]] = Field(None, description="Self-Healing 폼 셀렉터 전략")
 
     class Config:
         from_attributes = True

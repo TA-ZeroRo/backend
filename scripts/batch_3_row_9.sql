@@ -1,0 +1,2 @@
+INSERT INTO campaigns (title,description,host_organizer,campaign_url,image_url,start_date,end_date,region,category,status,submission_type)
+VALUES ($$진해해양공원 맑은 바다 만들기 및 줍깅 캠페인$$,$$경남 진해해양공원에서 건강과 해양환경을 동시에 지키는 거리 줍깅 캠페인. 참가자 누구나 간편한 복장만 착용, 준비물 불필요, 현장 인증샷 촬영 및 사전 불참연락 강조. 시민참여 해양쓰레기 정화 캠페인$$,$$진해해양공원$$,$$https://www.1365.go.kr/vols/P9230/partcptn/grpCptn.do?type=show&progrmRegistNo=3334927$$,$$https://www.1365.go.kr/vols/P9230/partcptn/grpCptn.do?type=show&progrmRegistNo=3334927$$,$$2025-09-01$$,$$2025-11-30$$,$$경상남도 진해해양공원$$,'CONSERVATION','EXPECT','MANUAL_GUIDE');
