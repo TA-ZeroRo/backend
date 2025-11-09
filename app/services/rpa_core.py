@@ -392,3 +392,187 @@ async def take_screenshot_on_error(
     except Exception as e:
         logger.error(f"Failed to save screenshot: {str(e)}")
         return None
+
+
+# ===== 새로운 설정 기반 RPA 함수 =====
+
+async def submit_with_hybrid_config(
+    campaign_data: dict,
+    site_config: dict,
+    submission_data: dict,
+    credentials: dict
+) -> dict:
+    """
+    하이브리드 RPA 제출 함수 (로그인 공유 + 폼 개별)
+
+    로그인 설정: rpa_site_configs (공유)
+    폼 설정: campaigns (개별)
+
+    Parameters:
+    -----------
+    campaign_data : dict
+        Campaign 데이터 (rpa_form_url, rpa_form_config, rpa_field_mapping 등)
+    site_config : dict
+        사이트 로그인 설정 (rpa_site_configs 레코드)
+    submission_data : dict
+        제출할 데이터
+        예: {"user_name": "홍길동", "user_birth": "900101", ...}
+    credentials : dict
+        로그인 인증 정보
+        예: {"username": "user@example.com", "password": "password123"}
+
+    Returns:
+    --------
+    dict
+        {"success": True, "message": "..."} 또는 {"success": False, "error": "..."}
+
+    Example:
+    --------
+    >>> result = await submit_with_hybrid_config(
+    ...     campaign_data={
+    ...         "rpa_form_url": "https://eco.seoul.go.kr/apply",
+    ...         "rpa_form_config": {"selectors": {...}},
+    ...         "rpa_field_mapping": {"user_name": "name_input"}
+    ...     },
+    ...     site_config={
+    ...         "login_url": "https://eco.seoul.go.kr/login",
+    ...         "login_config": {"selectors": {...}}
+    ...     },
+    ...     submission_data={"user_name": "홍길동"},
+    ...     credentials={"username": "test@example.com", "password": "test123"}
+    ... )
+    >>> print(result)
+    {"success": True, "message": "Successfully submitted."}
+    """
+    from app.services.rpa_adapters.base import SelfHealingAdapter
+
+    browser: Optional[Browser] = None
+
+    try:
+        logger.info(f"Starting hybrid RPA for site: {site_config.get('site_name')}")
+
+        # Step 1: Validate inputs
+        if not credentials.get('username') or not credentials.get('password'):
+            logger.error("Missing username or password in credentials")
+            return {
+                "success": False,
+                "error": "Missing username or password in credentials"
+            }
+
+        if not submission_data:
+            logger.error("submission_data is empty")
+            return {
+                "success": False,
+                "error": "No submission data provided"
+            }
+
+        if not campaign_data.get('rpa_form_config'):
+            logger.error("Missing rpa_form_config in campaign_data")
+            return {
+                "success": False,
+                "error": "Campaign RPA form configuration is missing"
+            }
+
+        # Step 2: Launch browser
+        async with async_playwright() as playwright:
+            logger.debug(f"Launching Chromium browser (headless={HEADLESS_MODE})")
+            browser = await playwright.chromium.launch(
+                headless=HEADLESS_MODE,
+                slow_mo=SLOW_MO,
+                args=[
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--disable-gpu'
+                ]
+            )
+
+            # Create browser context
+            context = await browser.new_context(
+                viewport={'width': 1920, 'height': 1080},
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            )
+
+            page = await context.new_page()
+
+            # Step 3: Initialize Self-Healing Adapter (하이브리드)
+            adapter = SelfHealingAdapter(
+                page=page,
+                login_config=site_config.get('login_config', {}),
+                login_strategies=site_config.get('login_selector_strategies'),
+                form_config=campaign_data.get('rpa_form_config', {}),
+                form_strategies=campaign_data.get('rpa_form_selector_strategies'),
+                field_mapping=campaign_data.get('rpa_field_mapping', {})
+            )
+
+            # Step 4: Login (공통 설정 사용)
+            logger.info("Attempting login")
+            await page.goto(site_config['login_url'])
+            await page.wait_for_load_state('networkidle')
+
+            login_success = await adapter.login(credentials)
+
+            if not login_success:
+                logger.error("Login failed")
+                return {
+                    "success": False,
+                    "error": "Login failed - check credentials or site configuration"
+                }
+
+            # Step 5: Navigate to form (Campaign별 URL)
+            form_url = campaign_data.get('rpa_form_url')
+            if form_url:
+                logger.info(f"Navigating to form: {form_url}")
+                await page.goto(form_url)
+                await page.wait_for_load_state('networkidle')
+            else:
+                logger.debug("No form_url specified, assuming form is on current page")
+
+            # Step 5.5: Open modal if needed (wait for modal trigger button and click)
+            modal_trigger = campaign_data.get('rpa_modal_trigger')
+            if modal_trigger:
+                logger.info(f"Opening modal with trigger: {modal_trigger}")
+                try:
+                    trigger_button = page.locator(modal_trigger)
+                    await trigger_button.click()
+                    # Wait for modal to appear
+                    await page.wait_for_timeout(1000)
+                    logger.info("Modal opened successfully")
+                except Exception as e:
+                    logger.warning(f"Failed to open modal: {e}")
+
+            # Step 6: Fill form (Campaign별 설정 사용)
+            logger.info("Filling form")
+            fill_success = await adapter.fill_form(submission_data)
+
+            if not fill_success:
+                logger.warning("No fields were filled")
+                return {
+                    "success": False,
+                    "error": "Failed to fill form - check field mapping configuration"
+                }
+
+            # Step 7: Submit form
+            result = await adapter.submit_form()
+
+            logger.info(f"Hybrid RPA completed: {result}")
+
+            return result
+
+    except Exception as e:
+        logger.error(f"Unexpected error during hybrid RPA execution: {str(e)}", exc_info=True)
+        return {
+            "success": False,
+            "error": f"Unexpected error: {str(e)}"
+        }
+
+    finally:
+        # Cleanup
+        if browser:
+            try:
+                logger.debug("Closing browser")
+                await browser.close()
+                logger.info("Browser closed successfully")
+            except Exception as cleanup_error:
+                logger.error(f"Error closing browser: {str(cleanup_error)}", exc_info=True)

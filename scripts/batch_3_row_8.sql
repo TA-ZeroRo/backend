@@ -1,0 +1,2 @@
+INSERT INTO campaigns (title,description,host_organizer,campaign_url,image_url,start_date,end_date,region,category,status,submission_type)
+VALUES ($$센터 내 시설정화 봉사$$,$$기관(센터) 내에서 실시하는 실내·실외 환경정화 봉사활동. 봉사신청 후 사정상 불참 시 반드시 사전 연락 필수, 주요 환경정화 및 위생관리 중심, 시설이용자 안전 위한 집단 캠페인$$,$$사단법인 진주사랑의집$$,$$https://www.1365.go.kr/vols/P9230/partcptn/grpCptn.do?type=show&progrmRegistNo=3336028$$,$$https://www.1365.go.kr/vols/P9230/partcptn/grpCptn.do?type=show&progrmRegistNo=3336028$$,$$2025-09-01$$,$$2025-11-24$$,$$센터 내$$,'CONSERVATION','EXPECT','MANUAL_GUIDE');
