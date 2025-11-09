@@ -1,0 +1,2 @@
+INSERT INTO campaigns (title,description,host_organizer,campaign_url,image_url,start_date,end_date,region,category,status,submission_type)
+VALUES ($$부산현대미술관 산책 – 환경정화 및 SNS 챌린지$$,$$부산현대미술관 야외 일원에서 자율 환경정화(쓰레기 줍기), ‘워크온’ 앱으로 활동거리/걸음수/시간 인증, SNS 활동후기 게시 챌린지형. 1일 1시간, 월 최대 4회$$,$$부산현대미술관$$,$$https://www.1365.go.kr/vols/P9230/partcptn/grpCptn.do?type=show&progrmRegistNo=3334689$$,$$https://www.1365.go.kr/vols/P9230/partcptn/grpCptn.do?type=show&progrmRegistNo=3334689$$,$$2025-09-01$$,$$2025-11-30$$,$$부산광역시 부산현대미술관 야외 일원(자율)$$,'CONSERVATION','ACTIVE','MANUAL_GUIDE');
