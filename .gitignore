@@ -5,7 +5,7 @@ demo.py
 __pycache__/
 venv/*
 .claude/*
-
+.env.rpa
 # MCP configuration (contains tokens)
 .mcp.json
 .env.local
