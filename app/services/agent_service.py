@@ -72,20 +72,60 @@ class AgentService:
 
         @tool
         async def start_campaign(
-            campaign_id: int,
-            user_id: str
+            user_id: str,
+            campaign_id: Optional[int] = None,
+            campaign_name: Optional[str] = None
         ) -> str:
             """
             사용자가 특정 캠페인에 참여합니다. 캠페인의 미션 로그를 생성합니다.
 
             Args:
-                campaign_id: 참여할 캠페인 ID (정수)
                 user_id: 사용자 UUID (문자열)
+                campaign_id: 참여할 캠페인 ID (정수, 선택) - campaign_name과 둘 중 하나 필수
+                campaign_name: 참여할 캠페인 이름 (문자열, 선택) - campaign_id와 둘 중 하나 필수
 
             Returns:
                 JSON 형식의 미션 로그 생성 결과
             """
             try:
+                # 1. 둘 다 없으면 에러
+                if not campaign_id and not campaign_name:
+                    return json.dumps({
+                        "error": "campaign_id 또는 campaign_name 중 하나는 필수입니다."
+                    }, ensure_ascii=False)
+
+                # 2. campaign_name이 주어진 경우 → ID로 변환
+                if campaign_name and not campaign_id:
+                    # 캠페인 이름으로 검색
+                    search_result = await self.campaign_service.get_campaigns(
+                        status="ACTIVE",
+                        offset=0
+                    )
+
+                    campaigns = search_result.get("campaigns", [])
+
+                    # 이름이 정확히 일치하는 캠페인 찾기 (대소문자 무시)
+                    matched_campaign = None
+                    for campaign in campaigns:
+                        if campaign["name"].lower() == campaign_name.lower():
+                            matched_campaign = campaign
+                            break
+
+                    # 정확히 일치하는 게 없으면 부분 일치 검색
+                    if not matched_campaign:
+                        for campaign in campaigns:
+                            if campaign_name.lower() in campaign["name"].lower():
+                                matched_campaign = campaign
+                                break
+
+                    if not matched_campaign:
+                        return json.dumps({
+                            "error": f"'{campaign_name}' 캠페인을 찾을 수 없습니다. 정확한 캠페인 이름을 확인해주세요."
+                        }, ensure_ascii=False)
+
+                    campaign_id = matched_campaign["id"]
+
+                # 3. campaign_id로 참여 처리
                 result = await self.campaign_agent_service.start_campaign(
                     user_id=UUID(user_id),
                     campaign_id=campaign_id
