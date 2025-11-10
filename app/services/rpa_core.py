@@ -138,7 +138,12 @@ async def submit_eco_mileage_form(
             page = await context.new_page()
 
             # Step 2: Navigate to login page
-            login_url = campaign_url  # Use provided campaign URL
+            if RPA_MODE == "mock":
+                login_url = MOCK_HTML_PATH.as_uri()
+            else:
+                # TODO: Replace with actual production URL
+                login_url = os.getenv("RPA_LOGIN_URL", "https://ecomileage.seoul.go.kr/login")
+
             logger.info(f"Navigating to login page: {login_url}")
             await page.goto(login_url, wait_until='networkidle', timeout=30000)
 
@@ -148,6 +153,10 @@ async def submit_eco_mileage_form(
 
             # Step 3: Perform login
             logger.info("Attempting to log in")
+
+            # Wait for login form to be attached and ensure it's in viewport
+            await page.wait_for_selector('#username', state='attached', timeout=10000)
+            await page.locator('#username').scroll_into_view_if_needed()
 
             # Fill login form
             await page.fill('#username', credentials['username'])
@@ -175,18 +184,24 @@ async def submit_eco_mileage_form(
                 await page.screenshot(path=str(SCREENSHOT_DIR / f"{screenshot_prefix}_03_after_login.png"))
                 logger.debug("Screenshot saved: 03_after_login.png")
 
+            # Check for visible login errors (not just DOM presence)
             error_selector = '.login-error, .alert-danger, .error-message'
-            if await page.locator(error_selector).count() > 0:
-                error_text = await page.locator(error_selector).first.text_content()
-                logger.error(f"Login failed: {error_text}")
+            error_locator = page.locator(error_selector)
 
-                if ENABLE_SCREENSHOTS:
-                    await page.screenshot(path=str(SCREENSHOT_DIR / f"{screenshot_prefix}_ERROR_login_failed.png"))
+            if await error_locator.count() > 0:
+                first_error = error_locator.first
+                # Only treat as error if the element is actually visible
+                if await first_error.is_visible():
+                    error_text = await first_error.text_content()
+                    logger.error(f"Login failed: {error_text}")
 
-                return {
-                    "success": False,
-                    "error": f"Login failed: {error_text}"
-                }
+                    if ENABLE_SCREENSHOTS:
+                        await page.screenshot(path=str(SCREENSHOT_DIR / f"{screenshot_prefix}_ERROR_login_failed.png"))
+
+                    return {
+                        "success": False,
+                        "error": f"Login failed: {error_text}"
+                    }
 
             logger.info("Login successful")
 

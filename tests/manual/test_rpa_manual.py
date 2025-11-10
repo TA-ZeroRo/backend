@@ -35,7 +35,7 @@ async def test_rpa_with_real_data():
 
     credentials = {
         "username": "test@example.com",
-        "password": "password123"  # Mock HTML의 테스트 계정
+        "password": "password123"  # Must match mock_eco_form.html credentials
     }
 
     print(f"\n[캠페인 URL]")
@@ -96,7 +96,7 @@ async def test_rpa_with_empty_submission_data():
     submission_data = {}
     credentials = {
         "username": "test@example.com",
-        "password": "password123"
+        "password": "password123"  # Must match mock_eco_form.html credentials
     }
 
     result = await submit_eco_mileage_form(campaign_url, submission_data, credentials)
