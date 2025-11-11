@@ -4,3 +4,9 @@ python-dotenv
 supabase
 uvicorn[standard]
 playwright
+
+langchain
+langchain-google-genai
+langchain-community
+langchain-core
+langgraph
