@@ -1,5 +1,5 @@
 """Agent Chat Schemas - AI 에이전트 대화 관련 스키마"""
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Dict, Any
 from uuid import UUID
 
@@ -17,6 +17,13 @@ class ChatRequest(BaseModel):
     history: Optional[List[ChatMessage]] = Field(
         default=[],
         description="이전 대화 히스토리 (선택사항, LangChain이 자동 관리)"
+    )
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: lambda v: str(v)
+        }
     )
 
 
