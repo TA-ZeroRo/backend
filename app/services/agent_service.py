@@ -6,7 +6,9 @@ import json
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.messages import HumanMessage
 
 from app.core.config import get_gemini_api_key
 from app.services.campaign_service import CampaignService
@@ -28,8 +30,19 @@ class AgentService:
             convert_system_message_to_human=True
         )
 
+        # 세션별 메모리 저장소 (RAM에 저장, DB 사용 안 함)
+        self.store = {}
+
         # Agent 초기화
         self.agent_executor = self._create_agent()
+
+        # Agent를 메모리 래퍼로 감싸기 (대화 맥락 자동 관리)
+        self.agent_with_memory = RunnableWithMessageHistory(
+            self.agent_executor,
+            self._get_session_history,
+            input_messages_key="messages",
+            output_messages_key="messages",
+        )
 
     def _create_agent(self):
         """LangGraph ReAct Agent 생성"""
@@ -180,6 +193,20 @@ Important Guidelines:
 
         return agent_executor
 
+    def _get_session_history(self, session_id: str) -> InMemoryChatMessageHistory:
+        """
+        세션 ID로 대화 히스토리 가져오기
+
+        Args:
+            session_id: 사용자 ID (세션 식별자)
+
+        Returns:
+            InMemoryChatMessageHistory 객체
+        """
+        if session_id not in self.store:
+            self.store[session_id] = InMemoryChatMessageHistory()
+        return self.store[session_id]
+
     async def chat(
         self,
         user_id: UUID,
@@ -187,41 +214,28 @@ Important Guidelines:
         history: Optional[List[Dict[str, str]]] = None
     ) -> Dict[str, Any]:
         """
-        사용자와 AI 에이전트 대화
+        사용자와 AI 에이전트 대화 (서버 메모리에서 맥락 자동 관리)
 
         Args:
             user_id: 사용자 UUID
             message: 사용자 메시지
-            history: 대화 히스토리 (클라이언트가 관리)
+            history: (deprecated) 서버에서 자동으로 관리
 
         Returns:
             응답 딕셔너리 (message)
         """
         try:
-            # 메시지 리스트 구성
-            messages = []
+            # 세션 ID로 사용자 ID 사용
+            session_id = str(user_id)
 
-            # 1. 이전 대화 히스토리 추가
-            if history:
-                for h in history:
-                    # h는 ChatMessage 객체 또는 딕셔너리일 수 있음
-                    if isinstance(h, dict):
-                        role = h.get("role", "user")
-                        content = h.get("content", "")
-                    else:
-                        # Pydantic 모델인 경우
-                        role = h.role
-                        content = h.content
-                    messages.append((role, content))
-
-            # 2. 현재 사용자 메시지 추가
+            # 현재 메시지만 전달 (과거 대화는 메모리에서 자동으로 로드)
             input_message = f"[User ID: {user_id}]\n{message}"
-            messages.append(("user", input_message))
 
-            # LangGraph의 invoke는 messages를 받음
-            result = await self.agent_executor.ainvoke({
-                "messages": messages
-            })
+            # 메모리가 적용된 agent 실행
+            result = await self.agent_with_memory.ainvoke(
+                {"messages": [HumanMessage(content=input_message)]},
+                config={"configurable": {"session_id": session_id}}
+            )
 
             # 마지막 메시지에서 응답 추출
             if result.get("messages"):
