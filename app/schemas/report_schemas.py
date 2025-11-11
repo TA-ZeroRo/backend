@@ -74,7 +74,6 @@ class MonthlyReportResponse(BaseModel):
         from_attributes=True,
         json_encoders={
 
-            UUID: lambda v: str(v),
-            date: lambda v: v.isoformat()
+            UUID: lambda v: str(v)
         }
     )
