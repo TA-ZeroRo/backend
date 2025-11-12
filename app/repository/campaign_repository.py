@@ -33,7 +33,7 @@ class CampaignRepository(BaseRepository):
 
         # 필터링 적용
         if region:
-            query = query.eq("region", region)
+            query = query.ilike("region", f"%{region}%")
 
         if category:
             query = query.eq("category", category)
