@@ -38,6 +38,27 @@ async def test_rpa_step_by_step():
             await page.wait_for_load_state('networkidle')
             print(f"✅ Current URL: {page.url}")
 
+            # Step 2.5: Close all today popups if exist
+            print("[Step 2.5] Checking for today-close popups...")
+            today_close_selector = "button.today-close:visible"
+            await page.wait_for_timeout(1000)  # Wait for popup to appear
+
+            # Close popups one by one, re-checking after each click
+            closed_count = 0
+            while True:
+                buttons = await page.locator(today_close_selector).all()
+                if len(buttons) == 0:
+                    break
+                print(f"   Closing popup {closed_count + 1}...")
+                await buttons[0].click()  # Always click the first one
+                await page.wait_for_timeout(500)
+                closed_count += 1
+
+            if closed_count > 0:
+                print(f"✅ {closed_count} popup(s) closed")
+            else:
+                print("   No visible today popup found")
+
             # Step 3: Fill login form
             print("[Step 3] Filling login form...")
             username_selector = "input[placeholder*='아이디']"
@@ -60,6 +81,27 @@ async def test_rpa_step_by_step():
             await page.goto(form_url)
             await page.wait_for_load_state('networkidle')
             print(f"✅ Current URL: {page.url}")
+
+            # Step 5.5: Close all today popups if exist
+            print("[Step 5.5] Checking for today-close popups...")
+            today_close_selector = "button.today-close:visible"
+            await page.wait_for_timeout(1000)  # Wait for popup to appear
+
+            # Close popups one by one, re-checking after each click
+            closed_count = 0
+            while True:
+                buttons = await page.locator(today_close_selector).all()
+                if len(buttons) == 0:
+                    break
+                print(f"   Closing popup {closed_count + 1}...")
+                await buttons[0].click()  # Always click the first one
+                await page.wait_for_timeout(500)
+                closed_count += 1
+
+            if closed_count > 0:
+                print(f"✅ {closed_count} popup(s) closed")
+            else:
+                print("   No visible today popup found")
 
             # Step 6: Open modal
             print("[Step 6] Opening mission modal...")
@@ -91,7 +133,7 @@ async def test_rpa_step_by_step():
             title_count = await page.locator(title_selector).count()
             print(f"   Title input found: {title_count}")
             if title_count > 0:
-                await page.locator(title_selector).fill("RPA 테스트 미션")
+                await page.locator(title_selector).fill("오래된 옷도 잘 수선해서 입었어요~")
                 print("   ✅ Title filled")
 
             # Content
@@ -99,7 +141,7 @@ async def test_rpa_step_by_step():
             content_count = await page.locator(content_selector).count()
             print(f"   Content textarea found: {content_count}")
             if content_count > 0:
-                await page.locator(content_selector).fill("RPA 자동화 테스트입니다.")
+                await page.locator(content_selector).fill("환경에 진심인 저는 옷 한 번을 사도 오래오래 수선해서 입는답니다^^! 우리 함께 동참하길 ~")
                 print("   ✅ Content filled")
 
             # Photo upload

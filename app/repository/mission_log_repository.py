@@ -10,20 +10,38 @@ class MissionLogRepository(BaseRepository):
 
     TABLE_NAME = "mission_logs"
 
-    async def get_by_user_id(self, user_id: UUID) -> List[Dict[str, Any]]:
+    async def get_by_user_id(
+        self,
+        user_id: UUID,
+        include_template: bool = False,
+        include_campaign: bool = False
+    ) -> List[Dict[str, Any]]:
         """
         사용자 ID로 미션 로그 목록 조회
 
         Parameters:
         - user_id: 사용자 UUID
+        - include_template: mission_templates 정보 포함 여부
+        - include_campaign: campaigns 정보 포함 여부
 
         Returns:
         - 미션 로그 목록 (최신순)
         """
+        # 기본 select 쿼리
+        select_query = "*"
+
+        # JOIN 쿼리 구성
+        if include_template and include_campaign:
+            select_query = "*, mission_templates(*, campaigns(*))"
+        elif include_template:
+            select_query = "*, mission_templates(*)"
+        elif include_campaign:
+            select_query = "*, mission_templates(campaigns(*))"
+
         response = (
             self.supabase
             .table(self.TABLE_NAME)
-            .select("*")
+            .select(select_query)
             .eq("user_id", str(user_id))
             .order("started_at", desc=True)
             .execute()
@@ -62,37 +80,79 @@ class MissionLogRepository(BaseRepository):
                 return None
             raise
 
-    async def get_by_template_id(self, mission_template_id: int) -> List[Dict[str, Any]]:
+    async def get_by_template_id(
+        self,
+        mission_template_id: int,
+        include_user: bool = False
+    ) -> List[Dict[str, Any]]:
         """
         미션 템플릿 ID로 미션 로그 목록 조회
 
         Parameters:
         - mission_template_id: 미션 템플릿 ID
+        - include_user: 사용자 정보 포함 여부
 
         Returns:
         - 미션 로그 목록
         """
+        select_query = "*, profiles(*)" if include_user else "*"
+
         response = (
             self.supabase
             .table(self.TABLE_NAME)
-            .select("*")
+            .select(select_query)
             .eq("mission_template_id", mission_template_id)
             .order("started_at", desc=True)
             .execute()
         )
         return response.data if response.data else []
 
-    async def get_log_by_id(self, log_id: int) -> Optional[Dict[str, Any]]:
+    async def get_log_by_id(
+        self,
+        log_id: int,
+        include_template: bool = False,
+        include_campaign: bool = False,
+        include_user: bool = False
+    ) -> Optional[Dict[str, Any]]:
         """
         미션 로그 ID로 단일 로그 조회
 
         Parameters:
         - log_id: 미션 로그 ID
+        - include_template: mission_templates 정보 포함 여부
+        - include_campaign: campaigns 정보 포함 여부
+        - include_user: 사용자 정보 포함 여부
 
         Returns:
         - 미션 로그 정보 또는 None
         """
-        return await self.find_by_id(self.TABLE_NAME, str(log_id))
+        # JOIN 쿼리 구성
+        select_parts = ["*"]
+        if include_user:
+            select_parts.append("profiles(*)")
+        if include_template and include_campaign:
+            select_parts.append("mission_templates(*, campaigns(*))")
+        elif include_template:
+            select_parts.append("mission_templates(*)")
+        elif include_campaign:
+            select_parts.append("mission_templates(campaigns(*))")
+
+        select_query = ", ".join(select_parts)
+
+        try:
+            response = (
+                self.supabase
+                .table(self.TABLE_NAME)
+                .select(select_query)
+                .eq("id", log_id)
+                .single()
+                .execute()
+            )
+            return response.data if response.data else None
+        except APIError as e:
+            if e.code == "PGRST116":
+                return None
+            raise
 
     async def create_log(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
@@ -130,3 +190,82 @@ class MissionLogRepository(BaseRepository):
         - 삭제 성공 여부
         """
         return await self.delete(self.TABLE_NAME, str(log_id))
+
+    async def get_by_user_and_status(
+        self,
+        user_id: UUID,
+        status: str,
+        include_template: bool = False,
+        include_campaign: bool = False
+    ) -> List[Dict[str, Any]]:
+        """
+        사용자 ID와 상태로 미션 로그 목록 조회
+
+        Parameters:
+        - user_id: 사용자 UUID
+        - status: 미션 상태 (IN_PROGRESS, PENDING_VERIFICATION, COMPLETED, FAILED)
+        - include_template: mission_templates 정보 포함 여부
+        - include_campaign: campaigns 정보 포함 여부
+
+        Returns:
+        - 미션 로그 목록
+        """
+        select_query = "*"
+        if include_template and include_campaign:
+            select_query = "*, mission_templates(*, campaigns(*))"
+        elif include_template:
+            select_query = "*, mission_templates(*)"
+        elif include_campaign:
+            select_query = "*, mission_templates(campaigns(*))"
+
+        response = (
+            self.supabase
+            .table(self.TABLE_NAME)
+            .select(select_query)
+            .eq("user_id", str(user_id))
+            .eq("status", status)
+            .order("started_at", desc=True)
+            .execute()
+        )
+        return response.data if response.data else []
+
+    async def get_by_campaign_id(
+        self,
+        campaign_id: int,
+        user_id: Optional[UUID] = None,
+        include_template: bool = False,
+        include_user: bool = False
+    ) -> List[Dict[str, Any]]:
+        """
+        캠페인 ID로 미션 로그 목록 조회
+
+        Parameters:
+        - campaign_id: 캠페인 ID
+        - user_id: 특정 사용자로 필터링 (선택사항)
+        - include_template: mission_templates 정보 포함 여부
+        - include_user: 사용자 정보 포함 여부
+
+        Returns:
+        - 미션 로그 목록
+        """
+        select_parts = ["*"]
+        if include_user:
+            select_parts.append("profiles(*)")
+        if include_template:
+            select_parts.append("mission_templates(*)")
+
+        select_query = ", ".join(select_parts)
+
+        # mission_templates.campaign_id로 필터링하기 위해 JOIN 사용
+        query = (
+            self.supabase
+            .table(self.TABLE_NAME)
+            .select(f"{select_query}, mission_templates!inner(campaign_id)")
+            .eq("mission_templates.campaign_id", campaign_id)
+        )
+
+        if user_id:
+            query = query.eq("user_id", str(user_id))
+
+        response = query.order("started_at", desc=True).execute()
+        return response.data if response.data else []
