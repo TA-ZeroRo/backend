@@ -1,5 +1,5 @@
 """Leaderboard 관련 Pydantic 스키마"""
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 from uuid import UUID
 
@@ -10,7 +10,7 @@ class LeaderboardUserResponse(BaseModel):
     username: Optional[str]
     user_img: Optional[str]
     total_points: int
-    rank: Optional[int] = None
+    rank: int = Field(ge=1, description="사용자 순위 (1부터 시작)")
 
     model_config = ConfigDict(
         from_attributes=True,
