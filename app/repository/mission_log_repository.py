@@ -251,16 +251,23 @@ class MissionLogRepository(BaseRepository):
         select_parts = ["*"]
         if include_user:
             select_parts.append("profiles(*)")
+        
+        # mission_templates.campaign_id로 필터링하기 위해 INNER JOIN 사용
+        # include_template이 True면 mission_templates(*)를 포함하고,
+        # False면 필터링만 수행 (mission_templates!inner(campaign_id)만 사용)
         if include_template:
-            select_parts.append("mission_templates(*)")
+            # INNER JOIN으로 필터링하면서 mission_templates 데이터도 포함
+            select_parts.append("mission_templates!inner(*)")
+        else:
+            # INNER JOIN으로 필터링만 수행 (데이터는 포함하지 않음)
+            select_parts.append("mission_templates!inner(campaign_id)")
 
         select_query = ", ".join(select_parts)
 
-        # mission_templates.campaign_id로 필터링하기 위해 JOIN 사용
         query = (
             self.supabase
             .table(self.TABLE_NAME)
-            .select(f"{select_query}, mission_templates!inner(campaign_id)")
+            .select(select_query)
             .eq("mission_templates.campaign_id", campaign_id)
         )
 

@@ -41,6 +41,9 @@ class MissionLogResponse(MissionLogBase):
     completed_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
+    # JOIN된 데이터 (include_template, include_campaign 파라미터에 따라 포함)
+    # Supabase 응답 구조: mission_templates 객체 안에 campaigns가 중첩될 수 있음
+    mission_templates: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(
         from_attributes=True,
