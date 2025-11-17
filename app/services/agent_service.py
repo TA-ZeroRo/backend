@@ -60,13 +60,13 @@ class AgentService:
             Args:
                 region: 지역 (예: "서울", "부산", "경기" 등). 생략 시 전국 캠페인 조회
                 category: 캠페인 카테고리. 다음 중 하나:
-                    - RECYCLING: 재활용/분리수거
-                    - TRANSPORTATION: 대중교통/자전거
-                    - ENERGY: 에너지 절약
-                    - ZERO_WASTE: 제로웨이스트/다회용기
-                    - CONSERVATION: 자연보호/환경정화
-                    - EDUCATION: 교육/세미나
-                    - OTHER: 기타
+                    - 재활용: 재활용/분리수거
+                    - 대중교통: 대중교통/자전거
+                    - 에너지절약: 에너지 절약
+                    - 제로웨이스트: 제로웨이스트/다회용기
+                    - 자연보호: 자연보호/환경정화
+                    - 교육: 교육/세미나
+                    - 기타: 기타
                 status: 캠페인 상태 (EXPECT: 예정, ACTIVE: 진행중, EXPIRED: 종료). 기본값은 ACTIVE
 
             Returns:
