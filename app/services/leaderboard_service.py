@@ -26,7 +26,7 @@ class LeaderboardService:
         users = await self.leaderboard_repo.get_top_users_by_points(limit)
         return {"leaderboard": users}
 
-    async def get_user_rank(self, user_id: UUID) -> Dict[str, int]:
-        """특정 사용자의 순위 조회"""
-        rank = await self.leaderboard_repo.get_user_ranking(str(user_id))
-        return {"rank": rank}
+    async def get_user_rank(self, user_id: UUID) -> Dict[str, Any] | None:
+        """특정 사용자의 정보와 순위 조회"""
+        user_data = await self.leaderboard_repo.get_user_ranking(str(user_id))
+        return user_data
