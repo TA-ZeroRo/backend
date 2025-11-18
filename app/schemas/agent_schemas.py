@@ -14,10 +14,6 @@ class ChatRequest(BaseModel):
     """AI 에이전트 대화 요청"""
     user_id: UUID = Field(..., description="사용자 ID")
     message: str = Field(..., description="사용자 메시지")
-    history: Optional[List[ChatMessage]] = Field(
-        default=[],
-        description="이전 대화 히스토리 (선택사항, LangChain이 자동 관리)"
-    )
 
     model_config = ConfigDict(
         from_attributes=True,
