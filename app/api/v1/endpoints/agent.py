@@ -33,8 +33,7 @@ async def chat_with_agent(request: ChatRequest):
     try:
         result = await agent_service.chat(
             user_id=request.user_id,
-            message=request.message,
-            history=request.history
+            message=request.message
         )
         return ChatResponse(**result)
     except Exception as e:
