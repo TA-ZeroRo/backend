@@ -10,33 +10,17 @@ class MissionLogRepository(BaseRepository):
 
     TABLE_NAME = "mission_logs"
 
-    async def get_by_user_id(
-        self,
-        user_id: UUID,
-        include_template: bool = False,
-        include_campaign: bool = False
-    ) -> List[Dict[str, Any]]:
+    async def get_by_user_id(self, user_id: UUID) -> List[Dict[str, Any]]:
         """
-        사용자 ID로 미션 로그 목록 조회
+        사용자 ID로 미션 로그 목록 조회 (템플릿 및 캠페인 정보 포함)
 
         Parameters:
         - user_id: 사용자 UUID
-        - include_template: mission_templates 정보 포함 여부
-        - include_campaign: campaigns 정보 포함 여부
 
         Returns:
-        - 미션 로그 목록 (최신순)
+        - 미션 로그 목록 (최신순, 템플릿 및 캠페인 정보 포함)
         """
-        # 기본 select 쿼리
-        select_query = "*"
-
-        # JOIN 쿼리 구성
-        if include_template and include_campaign:
-            select_query = "*, mission_templates(*, campaigns(*))"
-        elif include_template:
-            select_query = "*, mission_templates(*)"
-        elif include_campaign:
-            select_query = "*, mission_templates(campaigns(*))"
+        select_query = "*, mission_templates(*, campaigns(*))"
 
         response = (
             self.supabase
@@ -80,22 +64,17 @@ class MissionLogRepository(BaseRepository):
                 return None
             raise
 
-    async def get_by_template_id(
-        self,
-        mission_template_id: int,
-        include_user: bool = False
-    ) -> List[Dict[str, Any]]:
+    async def get_by_template_id(self, mission_template_id: int) -> List[Dict[str, Any]]:
         """
-        미션 템플릿 ID로 미션 로그 목록 조회
+        미션 템플릿 ID로 미션 로그 목록 조회 (사용자 정보 포함)
 
         Parameters:
         - mission_template_id: 미션 템플릿 ID
-        - include_user: 사용자 정보 포함 여부
 
         Returns:
-        - 미션 로그 목록
+        - 미션 로그 목록 (사용자 정보 포함)
         """
-        select_query = "*, profiles(*)" if include_user else "*"
+        select_query = "*, profiles(*)"
 
         response = (
             self.supabase
@@ -107,37 +86,17 @@ class MissionLogRepository(BaseRepository):
         )
         return response.data if response.data else []
 
-    async def get_log_by_id(
-        self,
-        log_id: int,
-        include_template: bool = False,
-        include_campaign: bool = False,
-        include_user: bool = False
-    ) -> Optional[Dict[str, Any]]:
+    async def get_log_by_id(self, log_id: int) -> Optional[Dict[str, Any]]:
         """
-        미션 로그 ID로 단일 로그 조회
+        미션 로그 ID로 단일 로그 조회 (템플릿, 캠페인, 사용자 정보 포함)
 
         Parameters:
         - log_id: 미션 로그 ID
-        - include_template: mission_templates 정보 포함 여부
-        - include_campaign: campaigns 정보 포함 여부
-        - include_user: 사용자 정보 포함 여부
 
         Returns:
         - 미션 로그 정보 또는 None
         """
-        # JOIN 쿼리 구성
-        select_parts = ["*"]
-        if include_user:
-            select_parts.append("profiles(*)")
-        if include_template and include_campaign:
-            select_parts.append("mission_templates(*, campaigns(*))")
-        elif include_template:
-            select_parts.append("mission_templates(*)")
-        elif include_campaign:
-            select_parts.append("mission_templates(campaigns(*))")
-
-        select_query = ", ".join(select_parts)
+        select_query = "*, mission_templates(*, campaigns(*)), profiles(*)"
 
         try:
             response = (
@@ -194,29 +153,19 @@ class MissionLogRepository(BaseRepository):
     async def get_by_user_and_status(
         self,
         user_id: UUID,
-        status: str,
-        include_template: bool = False,
-        include_campaign: bool = False
+        status: str
     ) -> List[Dict[str, Any]]:
         """
-        사용자 ID와 상태로 미션 로그 목록 조회
+        사용자 ID와 상태로 미션 로그 목록 조회 (템플릿 및 캠페인 정보 포함)
 
         Parameters:
         - user_id: 사용자 UUID
         - status: 미션 상태 (IN_PROGRESS, PENDING_VERIFICATION, COMPLETED, FAILED)
-        - include_template: mission_templates 정보 포함 여부
-        - include_campaign: campaigns 정보 포함 여부
 
         Returns:
-        - 미션 로그 목록
+        - 미션 로그 목록 (템플릿 및 캠페인 정보 포함)
         """
-        select_query = "*"
-        if include_template and include_campaign:
-            select_query = "*, mission_templates(*, campaigns(*))"
-        elif include_template:
-            select_query = "*, mission_templates(*)"
-        elif include_campaign:
-            select_query = "*, mission_templates(campaigns(*))"
+        select_query = "*, mission_templates(*, campaigns(*))"
 
         response = (
             self.supabase
@@ -232,37 +181,19 @@ class MissionLogRepository(BaseRepository):
     async def get_by_campaign_id(
         self,
         campaign_id: int,
-        user_id: Optional[UUID] = None,
-        include_template: bool = False,
-        include_user: bool = False
+        user_id: Optional[UUID] = None
     ) -> List[Dict[str, Any]]:
         """
-        캠페인 ID로 미션 로그 목록 조회
+        캠페인 ID로 미션 로그 목록 조회 (템플릿 및 사용자 정보 포함)
 
         Parameters:
         - campaign_id: 캠페인 ID
         - user_id: 특정 사용자로 필터링 (선택사항)
-        - include_template: mission_templates 정보 포함 여부
-        - include_user: 사용자 정보 포함 여부
 
         Returns:
-        - 미션 로그 목록
+        - 미션 로그 목록 (템플릿 및 사용자 정보 포함)
         """
-        select_parts = ["*"]
-        if include_user:
-            select_parts.append("profiles(*)")
-        
-        # mission_templates.campaign_id로 필터링하기 위해 INNER JOIN 사용
-        # include_template이 True면 mission_templates(*)를 포함하고,
-        # False면 필터링만 수행 (mission_templates!inner(campaign_id)만 사용)
-        if include_template:
-            # INNER JOIN으로 필터링하면서 mission_templates 데이터도 포함
-            select_parts.append("mission_templates!inner(*)")
-        else:
-            # INNER JOIN으로 필터링만 수행 (데이터는 포함하지 않음)
-            select_parts.append("mission_templates!inner(campaign_id)")
-
-        select_query = ", ".join(select_parts)
+        select_query = "*, mission_templates!inner(*), profiles(*)"
 
         query = (
             self.supabase
