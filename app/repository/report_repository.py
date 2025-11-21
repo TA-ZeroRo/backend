@@ -27,8 +27,8 @@ class ReportRepository(BaseRepository):
         """
         response = (
             self.supabase
-            .table("mission")
-            .select("campaign_id, campaigns(id, title, description)")
+            .table("mission_logs")
+            .select("mission_templates(campaign_id, campaigns(id, title, description))")
             .eq("user_id", str(user_id))
             .gte("started_at", start_date.isoformat())
             .lt("started_at", (end_date + timedelta(days=1)).isoformat())
@@ -39,8 +39,9 @@ class ReportRepository(BaseRepository):
         campaigns_dict = {}
         if response.data:
             for item in response.data:
-                if item.get("campaigns"):
-                    campaign = item["campaigns"]
+                mission_template = item.get("mission_templates", {})
+                if mission_template and mission_template.get("campaigns"):
+                    campaign = mission_template["campaigns"]
                     campaign_id = campaign.get("id")
                     if campaign_id and campaign_id not in campaigns_dict:
                         campaigns_dict[campaign_id] = campaign
@@ -66,8 +67,8 @@ class ReportRepository(BaseRepository):
         """
         response = (
             self.supabase
-            .table("mission")
-            .select("campaigns(category)")
+            .table("mission_logs")
+            .select("mission_templates(campaigns(category))")
             .eq("user_id", str(user_id))
             .eq("status", "COMPLETED")
             .gte("completed_at", start_date.isoformat())
@@ -79,8 +80,9 @@ class ReportRepository(BaseRepository):
         category_count: Dict[str, int] = {}
         if response.data:
             for item in response.data:
-                if item.get("campaigns"):
-                    category = item["campaigns"].get("category")
+                mission_template = item.get("mission_templates", {})
+                if mission_template and mission_template.get("campaigns"):
+                    category = mission_template["campaigns"].get("category")
                     if category:
                         category_count[category] = category_count.get(category, 0) + 1
 
@@ -160,7 +162,8 @@ class ReportRepository(BaseRepository):
         self,
         user_id: UUID,
         year: int,
-        month: int
+        month: int,
+        points_earned: int = 0
     ) -> Optional[Dict[str, Any]]:
         """
         월간 보고서 조회 기록 생성
@@ -169,6 +172,7 @@ class ReportRepository(BaseRepository):
         - user_id: 사용자 ID
         - year: 연도
         - month: 월
+        - points_earned: 획득 포인트
 
         Returns:
         - 생성된 기록 또는 None
@@ -176,7 +180,8 @@ class ReportRepository(BaseRepository):
         action_type = f"MONTHLY_REPORT_VIEW_{year}_{month:02d}"
         data = {
             "user_id": str(user_id),
-            "action_type": action_type
+            "action_type": action_type,
+            "points_earned": points_earned
         }
         return await self.create("activity_log", data)
 
