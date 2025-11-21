@@ -1,0 +1,45 @@
+"""User Repository"""
+from typing import Optional, Dict, Any
+from uuid import UUID
+from datetime import datetime
+from app.repository.base_repository import BaseRepository
+
+
+class UserRepository(BaseRepository):
+    """사용자 관련 데이터베이스 작업을 처리하는 Repository"""
+
+    TABLE_NAME = "profiles"
+
+    async def get_user_by_id(self, user_id: UUID) -> Optional[Dict[str, Any]]:
+        """사용자 ID로 사용자 정보 조회"""
+        return await self.find_by_id(self.TABLE_NAME, str(user_id))
+
+    async def create_user(self, user_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """새로운 사용자 생성 (타임스탬프 자동 설정)"""
+        # created_at은 DB에서 자동 생성되지만, 명시적으로 설정 가능
+        user_data.setdefault("created_at", datetime.now().isoformat())
+        return await self.create(self.TABLE_NAME, user_data)
+
+    async def update_user(self, user_id: UUID, user_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """사용자 정보 업데이트 (last_active_at 자동 갱신)"""
+        update_data = user_data.copy()
+        # last_active_at이 명시적으로 제공되지 않은 경우에만 자동 설정
+        if "last_active_at" not in update_data:
+            update_data["last_active_at"] = datetime.now().isoformat()
+        return await self.update(self.TABLE_NAME, str(user_id), update_data)
+        
+
+    async def delete_user(self, user_id: UUID) -> bool:
+        """사용자 삭제"""
+        return await self.delete(self.TABLE_NAME, str(user_id))
+
+    async def check_user_exists(self, user_id: UUID) -> bool:
+        """사용자 존재 여부 확인"""
+        response = (
+            self.supabase
+            .table(self.TABLE_NAME)
+            .select("id")
+            .eq("id", str(user_id))
+            .execute()
+        )
+        return bool(response.data)

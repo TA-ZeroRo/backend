@@ -1,6 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import router
+# from app.core.logging_config import setup_logging
+# import os
+
+# # 로깅 설정
+# log_level = os.getenv("LOG_LEVEL", "INFO")
+# log_file = os.getenv("LOG_FILE", "logs/zeroro.log")
+# setup_logging(log_level=log_level, log_file=log_file)
 
 app = FastAPI(
     title="ZeroRo Backend API",

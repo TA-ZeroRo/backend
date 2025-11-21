@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock 에코마일리지 폼 - 테스트용</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2ecc71;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #27ae60;
+        }
+        .message {
+            display: none;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .login-error, .form-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .info {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <!-- 로그인 페이지 -->
+    <div id="login-page" class="page active">
+        <div class="container">
+            <h1>🌿 에코마일리지 로그인</h1>
+            <div class="info">
+                <strong>테스트 계정:</strong><br>
+                ID: test@example.com<br>
+                PW: password123
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">아이디</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">로그인</button>
+            </form>
+            <div class="login-error message"></div>
+        </div>
+    </div>
+
+    <!-- 신청 페이지 -->
+    <div id="apply-page" class="page">
+        <div class="container">
+            <h1>🌿 에코마일리지 신청</h1>
+            <form id="apply-form">
+                <div class="form-group">
+                    <label for="name">신청자 이름 *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="birth">생년월일 (6자리) *</label>
+                    <input type="text" id="birth" name="birth" placeholder="예: 900101" pattern="[0-9]{6}" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">전화번호 *</label>
+                    <input type="tel" id="phone" name="phone" placeholder="예: 01012345678" required>
+                </div>
+                <div class="form-group">
+                    <label for="activity_date">활동일자 *</label>
+                    <input type="date" id="activity_date" name="activity_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="activity_content">활동내용 *</label>
+                    <textarea id="activity_content" name="activity_content" placeholder="환경 보호 활동 내용을 입력하세요" required></textarea>
+                </div>
+                <button type="button" id="submit-button">신청하기</button>
+            </form>
+            <div class="success-message message"></div>
+            <div class="form-error message"></div>
+        </div>
+    </div>
+
+    <script>
+        // 로그인 처리
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.querySelector('.login-error');
+
+            // 간단한 인증 체크
+            if (username === 'test@example.com' && password === 'password123') {
+                // 로그인 성공 - 신청 페이지로 이동
+                document.getElementById('login-page').classList.remove('active');
+                document.getElementById('apply-page').classList.add('active');
+
+                // URL 변경 (시뮬레이션)
+                window.history.pushState({}, '', '/apply');
+            } else {
+                // 로그인 실패
+                errorDiv.textContent = '아이디 또는 비밀번호가 일치하지 않습니다.';
+                errorDiv.style.display = 'block';
+
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 3000);
+            }
+        });
+
+        // 폼 제출 처리
+        document.getElementById('submit-button').addEventListener('click', function() {
+            const form = document.getElementById('apply-form');
+            const successDiv = document.querySelector('.success-message');
+            const errorDiv = document.querySelector('.form-error');
+
+            // 폼 유효성 검사
+            if (!form.checkValidity()) {
+                errorDiv.textContent = '필수 항목을 모두 입력해주세요.';
+                errorDiv.style.display = 'block';
+
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 3000);
+                return;
+            }
+
+            // 제출 성공 시뮬레이션
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            console.log('제출된 데이터:', data);
+
+            // 성공 메시지 표시
+            successDiv.textContent = '✅ 에코마일리지 신청이 완료되었습니다!';
+            successDiv.style.display = 'block';
+
+            // 폼 비활성화
+            form.style.opacity = '0.5';
+            form.style.pointerEvents = 'none';
+            this.disabled = true;
+        });
+
+        // 초기 URL 설정 (로그인 페이지)
+        window.history.replaceState({}, '', '/login');
+    </script>
+</body>
+</html>

@@ -3,3 +3,10 @@ google-genai
 python-dotenv
 supabase
 uvicorn[standard]
+playwright
+
+langchain-google-genai
+langchain-core
+langchain-community
+langgraph
+tavily-python

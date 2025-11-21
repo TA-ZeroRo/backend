@@ -1,0 +1,992 @@
+[
+  {
+    "campaign_row_id": "1",
+    "campaign_title": "탄탄대로 챌린지",
+    "order": 1,
+    "title": "미션 1",
+    "description": "일회용품 제로 챌린지**: 하루 동안 일회용품 대신 다회용품(텀블러, 에코백 등) 사용 후, 인증사진을 개인 SNS에 해시태그(#제로서울챌린지)와 함께 업로드",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "1",
+    "campaign_title": "탄탄대로 챌린지",
+    "order": 2,
+    "title": "미션 2",
+    "description": "분리배출 실천 인증**: 가정에서 쓰레기 분리배출 완료 후, 분리된 쓰레기의 종류와 분리과정 사진을 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "1",
+    "campaign_title": "탄탄대로 챌린지",
+    "order": 3,
+    "title": "미션 3",
+    "description": "미세먼지 줄이기 실천**: 실내외 환기, 공기정화 식물 관리, 친환경 이동수단(자전거, 대중교통) 이용 모습 인증사진 제출",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "2",
+    "campaign_title": "11월의 해녀와 바다",
+    "order": 1,
+    "title": "미션 1",
+    "description": "텀블러 챌린지: 텀블러에 물 또는 음료를 채우는 모습, 혹은 일회용컵 대신 텀블러를 사용한 인증샷을 찍어 인스타그램에 업로드하고 해시태그(#환경챌린지, #텀블러습관, #작은실천큰변화)를 함께 남깁니다.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "2",
+    "campaign_title": "11월의 해녀와 바다",
+    "order": 2,
+    "title": "미션 2",
+    "description": "자원재활용 인증: 플라스틱, 종이, 캔 등 집에서 분리배출하거나 재활용 가능한 물품을 활용한 인증사진을 인스타그램에 게시합니다",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "2",
+    "campaign_title": "11월의 해녀와 바다",
+    "order": 3,
+    "title": "미션 3",
+    "description": "환경 실천 릴레이: 챌린지 인증샷과 함께 다음 실천자를 지목(친구 태그)하여 릴레이 방식으로 챌린지 확산에 참여합니다",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "3",
+    "campaign_title": "반려해변 프로그램",
+    "order": 1,
+    "title": "미션 1",
+    "description": "해변 플로깅 활동**: 가까운 해변에서 쓰레기를 줍고, 수거물 종류·수량과 현장 인증사진 제출",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "3",
+    "campaign_title": "반려해변 프로그램",
+    "order": 2,
+    "title": "미션 2",
+    "description": "해변 쓰레기 모니터링 기록**: 수거한 쓰레기 내역(종류, 수량)을 반려해변 앱에 등록하고 화면을 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "3",
+    "campaign_title": "반려해변 프로그램",
+    "order": 3,
+    "title": "미션 3",
+    "description": "SNS 해변 캠페인 홍보**: 반려해변 활동 후기와 인증사진을 본인의 SNS에 포스팅하여 주변에 캠페인 확산. | 상시 | 상시 | 대한민국 전국 해변(입양 신청 가능 해변 기준) | 해양정화, 해변 입양, 시민참여, 쓰레기 데이터 기록 | 진행중 | 입력일(또는 크롤링/DB 저장 시각) |  |\n| 4 |  | 서울 WYD ‘온 세상에 생명의 숨을’ 캠페인 | 2027 세계청년대회의 주제 \"사랑-생태\" 실현을 위해 매년 봄·가을 서울특별시와 산림청 협력 하에 나무심기 행사를 추진. 청년들이 직접 나무를 심으며 자연의 소중함을 체험하고 지속적 친환경 습관을 갖도록 독려. 전 세계 청년의 공동 참여 초대 | 2027 서울 세계청년대회 조직위원회, 서울특별시, 산림청 | https://wydseoul.org/introduction/sustainability | https://wydseoul.org/introduction/sustainability |",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "3",
+    "campaign_title": "반려해변 프로그램",
+    "order": 4,
+    "title": "미션 4",
+    "description": "나무심기 참가 및 인증**: 봄·가을 나무심기 행사에 직접 참여하여 심는 과정 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "3",
+    "campaign_title": "반려해변 프로그램",
+    "order": 5,
+    "title": "미션 5",
+    "description": "지속가능 생활습관 챌린지**: 1주일 동안 에너지 절약, 플라스틱 감량 등 친환경 습관을 실천한 후, 일지·사진을 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "3",
+    "campaign_title": "반려해변 프로그램",
+    "order": 6,
+    "title": "미션 6",
+    "description": "지역 생태탐방 참가**: 지역 생태환경 보호 관련 행사(생태탐방, 환경해설)에 참여, 현장사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "5",
+    "campaign_title": "2025 제주남방큰돌고래와 함께하는 플로깅",
+    "order": 1,
+    "title": "미션 1",
+    "description": "돌고래 해변 플로깅 참가**: 행사 일시·장소(함덕해수욕장, 이호테우해수욕장)에서 플로깅 후, 활동 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "5",
+    "campaign_title": "2025 제주남방큰돌고래와 함께하는 플로깅",
+    "order": 2,
+    "title": "미션 2",
+    "description": "바다생물 보호 메시지 남기기**: 캠페인 참가 인증 후, 제주의 바다와 돌고래 보호 메시지를 담은 SNS 포스팅",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "5",
+    "campaign_title": "2025 제주남방큰돌고래와 함께하는 플로깅",
+    "order": 3,
+    "title": "미션 3",
+    "description": "친환경 이동수단 이용 인증**: 행사 참가 시 친환경 교통수단(대중교통, 자전거 등) 이용 모습 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "6",
+    "campaign_title": "2025 깨끗한 원주 만들기 비대면 환경정화 봉사활동",
+    "order": 1,
+    "title": "미션 1",
+    "description": "환경정화 봉사활동 참여**: 지정장소(공원, 하천, 전통시장 등)에서 쓰레기 수거 및 환경미화 활동 후 인증사진 등록.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "6",
+    "campaign_title": "2025 깨끗한 원주 만들기 비대면 환경정화 봉사활동",
+    "order": 2,
+    "title": "미션 2",
+    "description": "자원봉사 홍보 캠페인**: 깨끗한 환경 만들기 슬로건·포스터를 만들어 SNS 또는 현장에 홍보",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "6",
+    "campaign_title": "2025 깨끗한 원주 만들기 비대면 환경정화 봉사활동",
+    "order": 3,
+    "title": "미션 3",
+    "description": "탄소중립 실천 기록**: 1주간 일상에서 탄소발생 최소화 실천(절전, 걷기, 분리배출 등) 후 실천 일지, 인증 사진 제출",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "7",
+    "campaign_title": "시민공원 환경정화",
+    "order": 1,
+    "title": "미션 1",
+    "description": "해변/하천 플로깅: 쓰레기를 줍는 활동 후, 수거 현장와 분류 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "7",
+    "campaign_title": "시민공원 환경정화",
+    "order": 2,
+    "title": "미션 2",
+    "description": "담배꽁초·플라스틱 수거 미션: 미니 플로깅 집중적으로 담배꽁초, 플라스틱 등만 분리·수거하고 수량 집계, 인증사진 제출",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "7",
+    "campaign_title": "시민공원 환경정화",
+    "order": 3,
+    "title": "미션 3",
+    "description": "환경 캠페인 SNS 홍보: ‘쓰담걷Go’ 등 친환경 챌린지 참여 인증사진과 미션 후기를 SNS에 해시태그와 함께 업로드",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "8",
+    "campaign_title": "익산 청소년문화의거리 플로깅 및 폐화분 리사이클링 활동",
+    "order": 1,
+    "title": "미션 1",
+    "description": "환경 실천 챌린지 3일 연속: 일상 속 환경행동(예: 텀블러·에코백 사용, 분리배출, 에너지 절약) 하루 3가지씩, 3일간 실천 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "8",
+    "campaign_title": "익산 청소년문화의거리 플로깅 및 폐화분 리사이클링 활동",
+    "order": 2,
+    "title": "미션 2",
+    "description": "타임스탬프 앱 인증: 각 미션 실천 후 ‘타임스탬프’ 앱으로 완료 시간 기록, 사진과 함께 제출",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "8",
+    "campaign_title": "익산 청소년문화의거리 플로깅 및 폐화분 리사이클링 활동",
+    "order": 3,
+    "title": "미션 3",
+    "description": "참여 소감·아이디어 공유: 3일간 챌린지 참여 후 느낀 점과 추가 환경 실천 아이디어를 요약해 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "9",
+    "campaign_title": "홍대 레드로드 골목여행, 플로깅 및 분리수거 봉사",
+    "order": 1,
+    "title": "미션 1",
+    "description": "지역 환경정화 행사 참가: 공원, 하천, 전통시장 등에서 쓰레기 줍기 및 정화활동 사진 인증",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "9",
+    "campaign_title": "홍대 레드로드 골목여행, 플로깅 및 분리수거 봉사",
+    "order": 2,
+    "title": "미션 2",
+    "description": "환경 캠페인 포스터·슬로건 제작: 환경보호를 위한 슬로건이나 포스터를 만들어 행사장 또는 SNS에 공개.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "9",
+    "campaign_title": "홍대 레드로드 골목여행, 플로깅 및 분리수거 봉사",
+    "order": 3,
+    "title": "미션 3",
+    "description": "플로깅·감시활동 기록: 단체로 플로깅 및 쓰레기 현황 기록, 활동 결과를 데이터나 사진으로 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "10",
+    "campaign_title": "김포시하천살리기추진단 하천정화 및 곤충뱃지 만들기 캠페인",
+    "order": 1,
+    "title": "미션 1",
+    "description": "탄소중립 실천 일지: 1주일간 일상 속 탄소감축 실천(걷기, 분리배출, 절전 등) 행동을 기록 및 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "10",
+    "campaign_title": "김포시하천살리기추진단 하천정화 및 곤충뱃지 만들기 캠페인",
+    "order": 2,
+    "title": "미션 2",
+    "description": "분리배출 챌린지: 집 또는 공공장소 분리배출 완수 후, 종류별로 분리해 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "10",
+    "campaign_title": "김포시하천살리기추진단 하천정화 및 곤충뱃지 만들기 캠페인",
+    "order": 3,
+    "title": "미션 3",
+    "description": "환경퀴즈·교육 참여: 온라인/오프라인 환경보호 퀴즈 또는 교육 프로그램 참가 후 후기·사진 제출",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "11",
+    "campaign_title": "강남구 플로깅로드 오프라인 환경정화 봉사",
+    "order": 1,
+    "title": "미션 1",
+    "description": "하천정화 활동 참여: 하천 주변 쓰레기 줍기, 참여 모습과 수거 결과 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "11",
+    "campaign_title": "강남구 플로깅로드 오프라인 환경정화 봉사",
+    "order": 2,
+    "title": "미션 2",
+    "description": "에코백·텀블러 사용 실천: 1주간 에코백·텀블러를 사용하면서 달라진 점, 느낌 기록, 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "11",
+    "campaign_title": "강남구 플로깅로드 오프라인 환경정화 봉사",
+    "order": 3,
+    "title": "미션 3",
+    "description": "자원봉사 홍보 UCC 제작: 직접 활동 후기나 홍보 영상을 만들어 SNS 공유.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "12",
+    "campaign_title": "플로깅 봉사활동 (갯골생태공원/배곧한울공원/오이도선사유적공원 중 선택)",
+    "order": 1,
+    "title": "미션 1",
+    "description": "지역 환경보호 캠페인 참가: 지역 행사에서 친환경 실천활동 참여, 현장·결과 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "12",
+    "campaign_title": "플로깅 봉사활동 (갯골생태공원/배곧한울공원/오이도선사유적공원 중 선택)",
+    "order": 2,
+    "title": "미션 2",
+    "description": "플로깅/걷기 챌린지: 동네/하천/해변 걷기하면서 쓰레기 줍고, 인증 사진 및 거리 기록.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "12",
+    "campaign_title": "플로깅 봉사활동 (갯골생태공원/배곧한울공원/오이도선사유적공원 중 선택)",
+    "order": 3,
+    "title": "미션 3",
+    "description": "미세먼지 줄이기 습관: 대중교통, 자전거 이용, 실내 환기, 공기정화식물 관리 등 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "15",
+    "campaign_title": "2025년 관악산 2차 산불예방 플로깅",
+    "order": 1,
+    "title": "미션 1",
+    "description": "환경행동 챌린지: 에코백‧텀블러 사용, 분리배출, 절전·걷기 등 실생활 친환경 행동 하루 3개씩 3일간 실천, 각각 인증사진(타임스탬프 등) 남기기",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "15",
+    "campaign_title": "2025년 관악산 2차 산불예방 플로깅",
+    "order": 2,
+    "title": "미션 2",
+    "description": "활동 참여 후 카카오톡 채널 또는 프로그램 지정 앱으로 실적사진, 소감 제출하여 봉사시간 인정",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "15",
+    "campaign_title": "2025년 관악산 2차 산불예방 플로깅",
+    "order": 3,
+    "title": "미션 3",
+    "description": "매일 다른 친환경 행동 선택·실천, 3일간 총 9장 이상 사진 인증 및 활동소감 기록.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "16",
+    "campaign_title": "우리 같이 플로깅 (인천 산, 공원, 동네 등 자율 플로깅)",
+    "order": 1,
+    "title": "미션 1",
+    "description": "환경행동 챌린지: 에코백‧텀블러 사용, 분리배출, 절전·걷기 등 실생활 친환경 행동 하루 3개씩 3일간 실천, 각각 인증사진(타임스탬프 등) 남기기",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "16",
+    "campaign_title": "우리 같이 플로깅 (인천 산, 공원, 동네 등 자율 플로깅)",
+    "order": 2,
+    "title": "미션 2",
+    "description": "활동 참여 후 카카오톡 채널 또는 프로그램 지정 앱으로 실적사진, 소감 제출하여 봉사시간 인정",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "16",
+    "campaign_title": "우리 같이 플로깅 (인천 산, 공원, 동네 등 자율 플로깅)",
+    "order": 3,
+    "title": "미션 3",
+    "description": "매일 다른 친환경 행동 선택·실천, 3일간 총 9장 이상 사진 인증 및 활동소감 기록.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "17",
+    "campaign_title": "진월동 푸른길 공원 산책 및 환경정화, 정크아트 콘테스트",
+    "order": 1,
+    "title": "미션 1",
+    "description": "환경행동 챌린지: 에코백‧텀블러 사용, 분리배출, 절전·걷기 등 실생활 친환경 행동 하루 3개씩 3일간 실천, 각각 인증사진(타임스탬프 등) 남기기",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "17",
+    "campaign_title": "진월동 푸른길 공원 산책 및 환경정화, 정크아트 콘테스트",
+    "order": 2,
+    "title": "미션 2",
+    "description": "활동 참여 후 카카오톡 채널 또는 프로그램 지정 앱으로 실적사진, 소감 제출하여 봉사시간 인정",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "17",
+    "campaign_title": "진월동 푸른길 공원 산책 및 환경정화, 정크아트 콘테스트",
+    "order": 3,
+    "title": "미션 3",
+    "description": "매일 다른 친환경 행동 선택·실천, 3일간 총 9장 이상 사진 인증 및 활동소감 기록.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "18",
+    "campaign_title": "환경지킴이 서포터즈 2기 '아미유' 줍깅 챌린지",
+    "order": 1,
+    "title": "미션 1",
+    "description": "지역(공원, 학교, 거리 등)에서 플로깅 실시 후, 활동 과정·결과(모은 쓰레기 종류별) 사진 3장 이상 인증 및 제출",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "18",
+    "campaign_title": "환경지킴이 서포터즈 2기 '아미유' 줍깅 챌린지",
+    "order": 2,
+    "title": "미션 2",
+    "description": "분리배출 교육자료(또는 영상) 학습 후, 스스로 실천한 분리배출 실전 모습 인증샷과 간단한 분리 내역 기록.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "18",
+    "campaign_title": "환경지킴이 서포터즈 2기 '아미유' 줍깅 챌린지",
+    "order": 3,
+    "title": "미션 3",
+    "description": "가족·친구와 단체 참여 시, 함께하는 활동 모습 단체 인증사진 및 소감 또는 다짐 카드 공유",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "19",
+    "campaign_title": "문화체험(공연 관람)과 함께하는 만경강변 쓰레기 주워 담기",
+    "order": 1,
+    "title": "미션 1",
+    "description": "직접 만든 환경보호 피켓·슬로건을 들고 캠페인 인증사진 촬영 및 SNS 공유.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "19",
+    "campaign_title": "문화체험(공연 관람)과 함께하는 만경강변 쓰레기 주워 담기",
+    "order": 2,
+    "title": "미션 2",
+    "description": "쓰레기 분리수거(플라스틱, 캔, 종이 등 3종 이상) 현장 분류 모습과 분리 내역 사진으로 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "19",
+    "campaign_title": "문화체험(공연 관람)과 함께하는 만경강변 쓰레기 주워 담기",
+    "order": 3,
+    "title": "미션 3",
+    "description": "환경 캠페인 또는 봉사활동 참여 소감문 작성, 본인 또는 참여팀의 후기 사진을 첨부해 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "20",
+    "campaign_title": "송현근린공원 산책 플로깅(반려가족/시민 중심 환경정화)",
+    "order": 1,
+    "title": "미션 1",
+    "description": "동네 또는 학교 주변 플로깅(쓰레기줍기) 후, 시작·과정·분리배출 3컷 이상 사진 촬영 및 활동일지 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "20",
+    "campaign_title": "송현근린공원 산책 플로깅(반려가족/시민 중심 환경정화)",
+    "order": 2,
+    "title": "미션 2",
+    "description": "주 1회 이상 친환경 실천 행동(절전, 걷기, 일회용품 줄이기)습관화, 실천 사진·일지 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "20",
+    "campaign_title": "송현근린공원 산책 플로깅(반려가족/시민 중심 환경정화)",
+    "order": 3,
+    "title": "미션 3",
+    "description": "단체 봉사 참여 시, 팀별 활동 계획서 및 단체 미션 수행(예: 지역 캠페인, 환경포스터 제작) 후 결과보고",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "21",
+    "campaign_title": "APEC 맞이 대면 플로깅 (경주시 환경정화)",
+    "order": 1,
+    "title": "미션 1",
+    "description": "환경정화 현장활동(공원, 거리 등)에서 수거한 쓰레기 종류별 분류·정산 후 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "21",
+    "campaign_title": "APEC 맞이 대면 플로깅 (경주시 환경정화)",
+    "order": 2,
+    "title": "미션 2",
+    "description": "환경보호 교육 또는 온라인 영상 수강 후 퀴즈 풀이 기록 및 시청 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "21",
+    "campaign_title": "APEC 맞이 대면 플로깅 (경주시 환경정화)",
+    "order": 3,
+    "title": "미션 3",
+    "description": "SNS 챌린지 방식의 친환경 실천 인증(해시태그, 릴레이 지목)으로 참여 후 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "22",
+    "campaign_title": "을지로 쓰담쓰담 (개별 플로깅 캠페인)",
+    "order": 1,
+    "title": "미션 1",
+    "description": "플로깅(쓰레기줍기) 활동 1회 참여 후 시작·활동·종료 현장사진 총 3장 이상 인증 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "22",
+    "campaign_title": "을지로 쓰담쓰담 (개별 플로깅 캠페인)",
+    "order": 2,
+    "title": "미션 2",
+    "description": "분리배출 또는 자원순환 교육 콘텐츠 학습 후 직접 실천 내용 및 인증사진 기록.\n3.활동 후 하루 동안 각종 친환경 실천(에코백, 절전, 분리배출 등) 모습을 사진으로 남겨보고서 작성.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "23",
+    "campaign_title": "홍대 레드로드 골목여행 플로깅+분리수거",
+    "order": 1,
+    "title": "미션 1",
+    "description": "환경미화(청소, 쓰레기줍기 등) 활동 실시, 과정 및 결과 사진 촬영 후 보고서 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "23",
+    "campaign_title": "홍대 레드로드 골목여행 플로깅+분리수거",
+    "order": 2,
+    "title": "미션 2",
+    "description": "지도/피켓을 제작해 지역사회에 환경보호 홍보활동을 진행, 준비 과정과 캠페인 현장 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "23",
+    "campaign_title": "홍대 레드로드 골목여행 플로깅+분리수거",
+    "order": 3,
+    "title": "미션 3",
+    "description": "활동을 마친 뒤 1주일(또는 일주일 내) 동안 실천한 친환경 생활 습관에 대한 일지 및 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "24",
+    "campaign_title": "등촌1종합사회복지관 플로깅 '줍줍이들’",
+    "order": 1,
+    "title": "미션 1",
+    "description": "등촌주공1단지, 근린공원 일대에서 플로깅으로 쓰레기 수거 후, 봉투와 집게 합계 인증사진 찍어 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "24",
+    "campaign_title": "등촌1종합사회복지관 플로깅 '줍줍이들’",
+    "order": 2,
+    "title": "미션 2",
+    "description": "분리수거 완료 후 복지관에 집게 반납 및 봉사일지 작성, 과정·결과 사진 기록, 보고서 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "24",
+    "campaign_title": "등촌1종합사회복지관 플로깅 '줍줍이들’",
+    "order": 3,
+    "title": "미션 3",
+    "description": "단체 봉사 신청 시 5인 이상 사전 문의 및 활동계획서·참여명단 작성, 단체 사진(최소 3장) 첨부 후 보고서 제출",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "25",
+    "campaign_title": "제주형 2인1조 장소무제한 플로깅(환경정화 자원봉사)",
+    "order": 1,
+    "title": "미션 1",
+    "description": "일상에서 다회용품(에코백, 텀블러 등) 사용 모습 3회 인증사진 찍어 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "25",
+    "campaign_title": "제주형 2인1조 장소무제한 플로깅(환경정화 자원봉사)",
+    "order": 2,
+    "title": "미션 2",
+    "description": "쓰레기 분리배출 실천 및 분리된 쓰레기 종류별 사진 기록.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "25",
+    "campaign_title": "제주형 2인1조 장소무제한 플로깅(환경정화 자원봉사)",
+    "order": 3,
+    "title": "미션 3",
+    "description": "친환경 이동수단(걷기, 대중교통) 이용 인증사진과 에너지 절약 행동 일지 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "26",
+    "campaign_title": "음암거점 플로킹 캠페인 환경정화",
+    "order": 1,
+    "title": "미션 1",
+    "description": "지역 환경정화(산책로, 공원 등)에서 쓰레기 1회 플로깅과 활동 인증사진 기록.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "26",
+    "campaign_title": "음암거점 플로킹 캠페인 환경정화",
+    "order": 2,
+    "title": "미션 2",
+    "description": "플라스틱, 캔, 종이 등 주요 폐기물 5종 수거 후 분리배출 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "26",
+    "campaign_title": "음암거점 플로킹 캠페인 환경정화",
+    "order": 3,
+    "title": "미션 3",
+    "description": "가족 또는 친구와 함께 환경정화 활동을 진행하고 단체 인증사진 및 후기 작성.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "27",
+    "campaign_title": "나주시 공공장소 플로깅 – 바로온 봉사 어플 연계 환경정화",
+    "order": 1,
+    "title": "미션 1",
+    "description": "환경교육 영상 시청 후 교육내용 퀴즈 풀고, SNS에 참여후기 인증샷 게시.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "27",
+    "campaign_title": "나주시 공공장소 플로깅 – 바로온 봉사 어플 연계 환경정화",
+    "order": 2,
+    "title": "미션 2",
+    "description": "분리배출 챌린지 3회 진행, 매번 종류별 분리한 쓰레기 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "27",
+    "campaign_title": "나주시 공공장소 플로깅 – 바로온 봉사 어플 연계 환경정화",
+    "order": 3,
+    "title": "미션 3",
+    "description": "실천활동(걷기, 절전 등) 후 릴레이 참여자 지목 및 SNS 챌린지 확산.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "28",
+    "campaign_title": "무안군 공공장소 플로깅 – 바로온봉사 앱 연계 환경정화",
+    "order": 1,
+    "title": "미션 1",
+    "description": "폐전자제품, 폐건전지 등 재활용 캠페인에 참여 후 분리배출 인증사진 촬영.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "28",
+    "campaign_title": "무안군 공공장소 플로깅 – 바로온봉사 앱 연계 환경정화",
+    "order": 2,
+    "title": "미션 2",
+    "description": "자원순환 교육 참가 후 활동일지 및 환경보호 퀴즈 문제 풀이 결과 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "28",
+    "campaign_title": "무안군 공공장소 플로깅 – 바로온봉사 앱 연계 환경정화",
+    "order": 3,
+    "title": "미션 3",
+    "description": "1주간 친환경 실천 행동(걷기, 분리배출, 절전) 기록 및 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "29",
+    "campaign_title": "전라남도 공공장소 플로깅 – 바로온봉사 앱 연계 환경정화",
+    "order": 1,
+    "title": "미션 1",
+    "description": "동네 플로깅(쓰레기줍기) 챌린지 참석 및 결과 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "29",
+    "campaign_title": "전라남도 공공장소 플로깅 – 바로온봉사 앱 연계 환경정화",
+    "order": 2,
+    "title": "미션 2",
+    "description": "직접 제작한 환경보호 피켓 또는 슬로건을 들고 인증사진 촬영해 공유.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "29",
+    "campaign_title": "전라남도 공공장소 플로깅 – 바로온봉사 앱 연계 환경정화",
+    "order": 3,
+    "title": "미션 3",
+    "description": "SNS 후기 및 릴레이 방식으로 다음 참가자 3명을 지목, 챌린지 확산.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "30",
+    "campaign_title": "구미 행복홀씨입양사업 환경정화·EM비누 체험·지구시민교육",
+    "order": 1,
+    "title": "미션 1",
+    "description": "구미시립중앙도서관 주변 상가거리에서 직접 환경정화(쓰레기 줍기, 청소) 활동을 실시하고, 과정 및 결과를 사진으로 인증합니다",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "30",
+    "campaign_title": "구미 행복홀씨입양사업 환경정화·EM비누 체험·지구시민교육",
+    "order": 2,
+    "title": "미션 2",
+    "description": "쓰레기 무단투기 근절을 위한 거리 캠페인(피켓, 슬로건, 안내문) 홍보 활동을 하며 인증사진을 남깁니다.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "30",
+    "campaign_title": "구미 행복홀씨입양사업 환경정화·EM비누 체험·지구시민교육",
+    "order": 3,
+    "title": "미션 3",
+    "description": "em 친환경 주물럭비누 만들기 또는 지구시민교육 등에 참가하여, 직접 제작 과정 사진이나 교육 참여 사진을 제출합니다.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "31",
+    "campaign_title": "센터 내 시설정화 봉사",
+    "order": 1,
+    "title": "미션 1",
+    "description": "지역 공원 또는 주변에서 플로깅(쓰레기줍기) 활동 실시 및 쓰레기 분류 후 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "31",
+    "campaign_title": "센터 내 시설정화 봉사",
+    "order": 2,
+    "title": "미션 2",
+    "description": "환경보호 캠페인 포스터 또는 슬로건 제작 후 SNS·행사 현장 등에 공유, 인증사진 기록.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "31",
+    "campaign_title": "센터 내 시설정화 봉사",
+    "order": 3,
+    "title": "미션 3",
+    "description": "참가자 모두의 친환경 실천 행동(절전, 분리배출, 대중교통 이용 등) 인증사진 및 일지 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "32",
+    "campaign_title": "진해해양공원 맑은 바다 만들기 및 줍깅 캠페인",
+    "order": 1,
+    "title": "미션 1",
+    "description": "단체 환경정화 활동(공원, 하천, 거리 등), 활동과정·결과를 사진으로 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "32",
+    "campaign_title": "진해해양공원 맑은 바다 만들기 및 줍깅 캠페인",
+    "order": 2,
+    "title": "미션 2",
+    "description": "플라스틱, 종이, 캔 등 3종 이상 쓰레기 분리수거 실시 후 정산표 및 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "32",
+    "campaign_title": "진해해양공원 맑은 바다 만들기 및 줍깅 캠페인",
+    "order": 3,
+    "title": "미션 3",
+    "description": "봉사 참가자 간 환경보호 다짐/슬로건 작성, 후 인증사진 및 인증 일지 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "34",
+    "campaign_title": "부산현대미술관 산책 – 환경정화 및 SNS 챌린지",
+    "order": 1,
+    "title": "미션 1",
+    "description": "지역 내 환경정화 활동(공원, 학교, 거리 등) 현장 참여 및 과정 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "34",
+    "campaign_title": "부산현대미술관 산책 – 환경정화 및 SNS 챌린지",
+    "order": 2,
+    "title": "미션 2",
+    "description": "참여 봉사자 모두가 플라스틱 줄이기 행동(에코백, 텀블러 등) 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "34",
+    "campaign_title": "부산현대미술관 산책 – 환경정화 및 SNS 챌린지",
+    "order": 3,
+    "title": "미션 3",
+    "description": "환경 캠페인 참여 후기·다짐을 활동일지 또는 SNS 후기 게시로 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "35",
+    "campaign_title": "창원시민안전체험관 환경정화 방역봉사(창원과학체험관 3층)",
+    "order": 1,
+    "title": "미션 1",
+    "description": "프로그램 지정 지역(학교, 공원, 거리)에서 환경정화 활동, 쓰레기 분류 후 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "35",
+    "campaign_title": "창원시민안전체험관 환경정화 방역봉사(창원과학체험관 3층)",
+    "order": 2,
+    "title": "미션 2",
+    "description": "자원순환 교육 또는 친환경 제품(EM 비누, 에코백 등) 만들기 실습과정 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "35",
+    "campaign_title": "창원시민안전체험관 환경정화 방역봉사(창원과학체험관 3층)",
+    "order": 3,
+    "title": "미션 3",
+    "description": "실천 행동(걷기, 절전, 분리배출 등) 일주일간 실천 일지 및 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "36",
+    "campaign_title": "치악산국립공원 탐방로 환경정화 봉사",
+    "order": 1,
+    "title": "미션 1",
+    "description": "탐방로 인근(비로봉, 사다리병창, 계곡길 등)에서 쓰레기 수거 및 환경 미화 활동 사진 인증",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "36",
+    "campaign_title": "치악산국립공원 탐방로 환경정화 봉사",
+    "order": 2,
+    "title": "미션 2",
+    "description": "봉사 시작·종료 시 치악산국립공원사무소 방문 및 봉사활동 기록대장 작성, 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "36",
+    "campaign_title": "치악산국립공원 탐방로 환경정화 봉사",
+    "order": 3,
+    "title": "미션 3",
+    "description": "봉사 완료 후 사무소 직원을 통해 현장 확인을 받거나, 인증사진을 제출해 실적 인정.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "37",
+    "campaign_title": "태백산국립공원 환경정화자원봉사",
+    "order": 1,
+    "title": "미션 1",
+    "description": "지정된 공원 또는 산책로에서 환경 정화 플로깅 활동을 실시하고, 봉투·집게와 수거 결과 사진으로 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "37",
+    "campaign_title": "태백산국립공원 환경정화자원봉사",
+    "order": 2,
+    "title": "미션 2",
+    "description": "쓰레기 종류별(플라스틱, 종이, 캔 등) 분리배출 후 인증사진 및 기록 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "37",
+    "campaign_title": "태백산국립공원 환경정화자원봉사",
+    "order": 3,
+    "title": "미션 3",
+    "description": "단체 또는 가족과 봉사 참여 후, 활동 과정·후기 및 단체 사진을 기록해 공유.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "38",
+    "campaign_title": "익산 남부시장 환경정화(2025년 하반기)",
+    "order": 1,
+    "title": "미션 1",
+    "description": "지역 내 녹지 또는 하천, 학교에서 환경정화 활동 진행 및 인증사진 촬영",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "38",
+    "campaign_title": "익산 남부시장 환경정화(2025년 하반기)",
+    "order": 2,
+    "title": "미션 2",
+    "description": "환경보호 포스터 또는 슬로건 만들기, 행사 현장 또는 SNS 게시 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "38",
+    "campaign_title": "익산 남부시장 환경정화(2025년 하반기)",
+    "order": 3,
+    "title": "미션 3",
+    "description": "실천 후 환경보호 다짐·행동일지 작성 및 결과 사진, 후기 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "39",
+    "campaign_title": "무등산국립공원동부사무소 환경정화/ASF·산림병해충 예찰 자원봉사",
+    "order": 1,
+    "title": "미션 1",
+    "description": "자연환경 체험, 생태탐방, 교육세션 등 참가 후 현장 사진 인증 및 일지 작성.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "39",
+    "campaign_title": "무등산국립공원동부사무소 환경정화/ASF·산림병해충 예찰 자원봉사",
+    "order": 2,
+    "title": "미션 2",
+    "description": "쓰레기 줍기, 분리배출 실천 후 사진 인증, 분리배출 결과 기록.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "39",
+    "campaign_title": "무등산국립공원동부사무소 환경정화/ASF·산림병해충 예찰 자원봉사",
+    "order": 3,
+    "title": "미션 3",
+    "description": "참가자끼리 친환경 실천 릴레이(걷기, 절전, 플라스틱 감축 등) 진행, 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "40",
+    "campaign_title": "강서구 자원봉사센터 탄소중립 코스 줍깅(2025)",
+    "order": 1,
+    "title": "미션 1",
+    "description": "지정 지역(공원, 초록길 등)에서 플로깅 봉사, 쓰레기 수거 과정·결과 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "40",
+    "campaign_title": "강서구 자원봉사센터 탄소중립 코스 줍깅(2025)",
+    "order": 2,
+    "title": "미션 2",
+    "description": "자원순환, 친환경 제품 만들기(EM비누 등) 실습 참여 후 인증사진 제출.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  },
+  {
+    "campaign_row_id": "40",
+    "campaign_title": "강서구 자원봉사센터 탄소중립 코스 줍깅(2025)",
+    "order": 3,
+    "title": "미션 3",
+    "description": "봉사활동 소감 및 환경보호 실천 다짐을 일지나 SNS에 기록, 사진 인증.",
+    "verification_type": "IMAGE",
+    "reward_points": 10
+  }
+]
