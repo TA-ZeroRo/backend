@@ -63,10 +63,10 @@ class CampaignAgentService:
             # 캠페인의 미션 템플릿 조회
             templates = await self.mission_template_repo.get_by_campaign_id(campaign_id)
             if not templates:
-                logger.warning(f"No mission templates found for campaign {campaign_id}")
+                logger.warning(f"캠페인 미션이 존재하지 않습니다. {campaign_id}")
                 return {
                     "success": False,
-                    "error": "No missions available for this campaign"
+                    "error": "캠페인 미션이 존재하지 않습니다."
                 }
 
             # 각 미션 템플릿에 대한 로그 생성
