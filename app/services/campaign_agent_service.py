@@ -7,8 +7,9 @@ from datetime import datetime
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.mission_template_repository import MissionTemplateRepository
 from app.repository.mission_log_repository import MissionLogRepository
-from app.repository.rpa_config_repository import RPAConfigRepository
-from app.services.rpa_core import submit_eco_mileage_form, submit_with_hybrid_config
+# Deprecated: 2025-01-22 - Moved to WebView RPA
+# from app.repository.rpa_config_repository import RPAConfigRepository
+# from app.services.rpa_core import submit_eco_mileage_form, submit_with_hybrid_config
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,8 @@ class CampaignAgentService:
         self.campaign_repo = CampaignRepository()
         self.mission_template_repo = MissionTemplateRepository()
         self.mission_log_repo = MissionLogRepository()
-        self.rpa_config_repo = RPAConfigRepository()
+        # Deprecated: 2025-01-22 - Moved to WebView RPA
+        # self.rpa_config_repo = RPAConfigRepository()
 
     async def start_campaign(
         self,
@@ -192,37 +194,47 @@ class CampaignAgentService:
                     "error": "Campaign not found"
                 }
 
+            # Deprecated: 2025-01-22 - Playwright RPA removed, use WebView RPA instead
+            # TODO: WebView RPA로 대체 - Frontend에서 WebView를 통해 사용자가 직접 제출
             # RPA 실행 방식 결정
             rpa_result = None
 
-            # 1. 하이브리드 RPA 사용 (campaign에 rpa_site_config_id와 rpa_form_config가 있으면)
-            if campaign.get('rpa_site_config_id') and campaign.get('rpa_form_config'):
-                logger.info(f"Using hybrid RPA with site_config_id: {campaign['rpa_site_config_id']}")
+            logger.info("RPA auto-submission disabled. Users should submit via WebView.")
+            # Manual submission via WebView - no automatic RPA execution
+            rpa_result = {
+                "success": False,
+                "error": "Automatic RPA submission is deprecated. Please use WebView submission.",
+                "message": "WebView에서 직접 제출해주세요."
+            }
 
-                # RPA 사이트 설정 조회 (로그인용)
-                site_config = await self.rpa_config_repo.get_by_id(
-                    campaign['rpa_site_config_id']
-                )
+            # # 1. 하이브리드 RPA 사용 (campaign에 rpa_site_config_id와 rpa_form_config가 있으면)
+            # if campaign.get('rpa_site_config_id') and campaign.get('rpa_form_config'):
+            #     logger.info(f"Using hybrid RPA with site_config_id: {campaign['rpa_site_config_id']}")
 
-                if not site_config:
-                    logger.error(f"RPA site config not found: {campaign['rpa_site_config_id']}")
-                    return {
-                        "success": False,
-                        "error": "RPA site configuration not found"
-                    }
+            #     # RPA 사이트 설정 조회 (로그인용)
+            #     site_config = await self.rpa_config_repo.get_by_id(
+            #         campaign['rpa_site_config_id']
+            #     )
 
-                # 하이브리드 RPA 실행 (로그인 공유 + 폼 개별)
-                rpa_result = await submit_with_hybrid_config(
-                    campaign_data=campaign,  # rpa_form_config, rpa_field_mapping 등 포함
-                    site_config=site_config,  # login_config, login_selector_strategies 등 포함
-                    submission_data=submission_data,
-                    credentials=credentials
-                )
+            #     if not site_config:
+            #         logger.error(f"RPA site config not found: {campaign['rpa_site_config_id']}")
+            #         return {
+            #             "success": False,
+            #             "error": "RPA site configuration not found"
+            #         }
 
-            # 2. 레거시 RPA 사용 (기존 방식 - 하위 호환성)
-            else:
-                logger.info("Using legacy RPA (submit_eco_mileage_form)")
-                rpa_result = await submit_eco_mileage_form(submission_data, credentials)
+            #     # 하이브리드 RPA 실행 (로그인 공유 + 폼 개별)
+            #     rpa_result = await submit_with_hybrid_config(
+            #         campaign_data=campaign,  # rpa_form_config, rpa_field_mapping 등 포함
+            #         site_config=site_config,  # login_config, login_selector_strategies 등 포함
+            #         submission_data=submission_data,
+            #         credentials=credentials
+            #     )
+
+            # # 2. 레거시 RPA 사용 (기존 방식 - 하위 호환성)
+            # else:
+            #     logger.info("Using legacy RPA (submit_eco_mileage_form)")
+            #     rpa_result = await submit_eco_mileage_form(submission_data, credentials)
 
             # RPA 결과에 따라 미션 로그 업데이트
             if rpa_result.get('success'):
