@@ -29,6 +29,7 @@ class SubmissionType(str, Enum):
     RPA_FORM_SUBMIT = "RPA_FORM_SUBMIT"  # RPA 폼 자동 제출
     DIRECT_API = "DIRECT_API"            # 직접 API 연동
     MANUAL_GUIDE = "MANUAL_GUIDE"        # 수동 안내
+    WEBVIEW_ASSISTED = "WEBVIEW_ASSISTED"  # 웹뷰 어시스트
 
 
 # ===== Campaign 응답 스키마 =====

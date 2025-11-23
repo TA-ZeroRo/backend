@@ -187,7 +187,8 @@ class ReportService:
             view_record = await self.report_repo.record_report_view(
                 user_id=user_id,
                 year=year,
-                month=month
+                month=month,
+                points_earned=points_earned
             )
             if not view_record:
                 raise HTTPException(
