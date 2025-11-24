@@ -1,9 +1,21 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
 from uuid import UUID
 from app.services.verification_service import VerificationService
 
 router = APIRouter()
 verification_service = VerificationService()
+
+
+# ===== 위치 검증 요청 스키마 =====
+class LocationVerificationRequest(BaseModel):
+    """위치 검증 요청"""
+    campaign_id: int
+    latitude: float
+    longitude: float
+    timestamp: Optional[str] = None  # ISO 8601 형식 (예: "2025-11-24T14:30:00")
 
 # @router.post("/image")
 # async def verify_image(image_data: dict):
@@ -126,3 +138,48 @@ async def create_quiz():
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
 
+
+@router.post("/location")
+async def verify_location(request: LocationVerificationRequest):
+    """
+    오프라인 캠페인의 위치 및 시간 검증
+
+    Request Body:
+    - campaign_id: 캠페인 ID
+    - latitude: 사용자 현재 위도
+    - longitude: 사용자 현재 경도
+    - timestamp: 인증 시간 (선택, ISO 8601 형식)
+
+    Response:
+    - is_valid: 검증 성공 여부
+    - reason: 검증 결과 메시지
+    - distance: 캠페인 장소와의 거리 (미터)
+    - verified_at: 검증 시간
+    - location_address: 캠페인 장소 주소
+    """
+    try:
+        # timestamp 파싱 (제공되지 않으면 현재 시간)
+        timestamp = None
+        if request.timestamp:
+            try:
+                timestamp = datetime.fromisoformat(request.timestamp)
+            except ValueError:
+                raise HTTPException(
+                    status_code=400,
+                    detail="timestamp 형식이 올바르지 않습니다. ISO 8601 형식을 사용하세요 (예: '2025-11-24T14:30:00')"
+                )
+
+        # 위치 검증 수행
+        result = await verification_service.verify_offline_campaign_location(
+            campaign_id=request.campaign_id,
+            user_lat=request.latitude,
+            user_lng=request.longitude,
+            timestamp=timestamp
+        )
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"위치 검증 중 오류가 발생했습니다: {str(e)}")

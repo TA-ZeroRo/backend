@@ -1,7 +1,7 @@
 """Campaign 관련 Pydantic 스키마"""
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any
-from datetime import date, datetime
+from datetime import date, datetime, time
 from enum import Enum
 
 
@@ -32,6 +32,39 @@ class SubmissionType(str, Enum):
     WEBVIEW_ASSISTED = "WEBVIEW_ASSISTED"  # 웹뷰 어시스트
 
 
+class CampaignType(str, Enum):
+    """캠페인 유형"""
+    ONLINE = "ONLINE"    # 온라인 캠페인 (위치 무관)
+    OFFLINE = "OFFLINE"  # 오프라인 캠페인 (특정 장소)
+
+
+# ===== Offline Campaign Location 스키마 =====
+class OfflineCampaignLocationBase(BaseModel):
+    """오프라인 캠페인 위치 정보 기본 스키마"""
+    location_lat: float = Field(..., description="캠페인 장소 위도")
+    location_lng: float = Field(..., description="캠페인 장소 경도")
+    location_radius: int = Field(100, description="허용 반경 (미터)")
+    location_address: Optional[str] = Field(None, description="사람이 읽을 수 있는 주소")
+    daily_start_time: Optional[time] = Field(None, description="일일 시작 시간 (예: 09:00)")
+    daily_end_time: Optional[time] = Field(None, description="일일 종료 시간 (예: 18:00)")
+
+
+class OfflineCampaignLocationResponse(OfflineCampaignLocationBase):
+    """오프라인 캠페인 위치 정보 응답 스키마"""
+    id: int
+    campaign_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class OfflineCampaignLocationCreate(OfflineCampaignLocationBase):
+    """오프라인 캠페인 위치 정보 생성 스키마"""
+    pass
+
+
 # ===== Campaign 응답 스키마 =====
 class CampaignResponse(BaseModel):
     """Campaign 응답 스키마"""
@@ -47,6 +80,7 @@ class CampaignResponse(BaseModel):
     category: Optional[CampaignCategory] = None
     status: CampaignStatus
     submission_type: Optional[SubmissionType] = None
+    campaign_type: CampaignType = Field(CampaignType.ONLINE, description="캠페인 유형")
     updated_at: datetime
 
     # RPA 하이브리드 구조 (로그인 공유 + 폼 개별)
@@ -55,6 +89,9 @@ class CampaignResponse(BaseModel):
     rpa_form_config: Optional[Dict[str, Any]] = Field(None, description="RPA 폼 셀렉터 설정 (Campaign별)")
     rpa_field_mapping: Optional[Dict[str, str]] = Field(None, description="submission_data → 폼 셀렉터 매핑")
     rpa_form_selector_strategies: Optional[Dict[str, Any]] = Field(None, description="Self-Healing 폼 셀렉터 전략")
+
+    # 오프라인 캠페인인 경우 위치 정보 포함
+    location: Optional[OfflineCampaignLocationResponse] = Field(None, description="오프라인 캠페인 위치 정보")
 
     class Config:
         from_attributes = True
