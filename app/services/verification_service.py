@@ -1,6 +1,6 @@
 """Verification Service - 인증 관련 비즈니스 로직"""
 from fastapi import HTTPException
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from google import genai
 from google.genai import types
 from sentence_transformers import SentenceTransformer, util
@@ -57,15 +57,15 @@ SUB_CATEGORIES = [
     SubCategory(2, '내용물이 비워진 우유갑/주스팩', MainCategory.PROPER_DISPOSAL),
     SubCategory(3, '깨끗한 스티로폼 박스', MainCategory.PROPER_DISPOSAL),
 
-    # mainIndex: 1 (다회용품 사용)
-    4: {'name': '카페/식당에서의 텀블러 사용', 'mainIndex': 1},
-    5: {'name': '다회용기(용기내) 포장', 'mainIndex': 1},
-    6: {'name': '장바구니 사용', 'mainIndex': 1},
+    # 다회용품 사용
+    SubCategory(4, '카페/식당에서의 텀블러 사용', MainCategory.REUSABLE_ITEMS),
+    SubCategory(5, '다회용기(용기내) 포장', MainCategory.REUSABLE_ITEMS),
+    SubCategory(6, '장바구니 사용', MainCategory.REUSABLE_ITEMS),
 
-    # mainIndex: 2 (자원 절약 및 재활용)
-    7: {'name': '전자영수증 발급 화면', 'mainIndex': 2},
-    8: {'name': '사용하지 않는 플러그 뽑기', 'mainIndex': 2},
-}
+    # 자원 절약 및 재활용
+    SubCategory(7, '전자영수증 발급 화면', MainCategory.RESOURCE_SAVING),
+    SubCategory(8, '사용하지 않는 플러그 뽑기', MainCategory.RESOURCE_SAVING),
+]
 
 # 이미지 검증 스키마
 category_verification_schema = types.Schema(
