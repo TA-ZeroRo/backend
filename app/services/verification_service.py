@@ -5,25 +5,57 @@ from google import genai
 from google.genai import types
 from sentence_transformers import SentenceTransformer, util
 import json
+from enum import IntEnum
+from dataclasses import dataclass
+from datetime import datetime, time
+from math import radians, cos, sin, asin, sqrt
 
 from app.core.config import get_gemini_api_key
 from app.repository.base_repository import BaseRepository
+from app.repository.campaign_repository import CampaignRepository
+from app.repository.offline_location_repository import OfflineLocationRepository
 
 
-# 카테고리 매핑
-MAIN_CATEGORIES = {
-    0: '올바른 분리배출',
-    1: '다회용품 사용',
-    2: '자원 절약 및 재활용',
-    3: '건의하기'
-}
+# ===== 카테고리 정의 =====
+class MainCategory(IntEnum):
+    """메인 카테고리"""
+    PROPER_DISPOSAL = 0
+    REUSABLE_ITEMS = 1
+    RESOURCE_SAVING = 2
+    SUGGESTION = 3
 
-SUB_CATEGORIES = {
-    # mainIndex: 0 (올바른 분리배출)
-    0: {'name': '페트병 라벨 제거', 'mainIndex': 0},
-    1: {'name': '택배 상자 테이프/송장 제거', 'mainIndex': 0},
-    2: {'name': '내용물이 비워진 우유갑/주스팩', 'mainIndex': 0},
-    3: {'name': '깨끗한 스티로폼 박스', 'mainIndex': 0},
+    @property
+    def display_name(self) -> str:
+        """카테고리의 한글 이름 반환"""
+        names = {
+            0: '올바른 분리배출',
+            1: '다회용품 사용',
+            2: '자원 절약 및 재활용',
+            3: '건의하기'
+        }
+        return names[self.value]
+
+
+@dataclass
+class SubCategory:
+    """서브 카테고리"""
+    id: int
+    name: str
+    main_category: MainCategory
+
+    @property
+    def main_category_id(self) -> int:
+        """메인 카테고리 ID 반환"""
+        return self.main_category.value
+
+
+# 서브 카테고리 목록
+SUB_CATEGORIES = [
+    # 올바른 분리배출
+    SubCategory(0, '페트병 라벨 제거', MainCategory.PROPER_DISPOSAL),
+    SubCategory(1, '택배 상자 테이프/송장 제거', MainCategory.PROPER_DISPOSAL),
+    SubCategory(2, '내용물이 비워진 우유갑/주스팩', MainCategory.PROPER_DISPOSAL),
+    SubCategory(3, '깨끗한 스티로폼 박스', MainCategory.PROPER_DISPOSAL),
 
     # mainIndex: 1 (다회용품 사용)
     4: {'name': '카페/식당에서의 텀블러 사용', 'mainIndex': 1},
@@ -198,3 +230,140 @@ class VerificationService:
         print(f"DEBUG: Max similarity score is {max_score}")
 
         return max_score > threshold
+
+    @staticmethod
+    def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+        """
+        두 좌표 간 거리 계산 (Haversine 공식)
+
+        Parameters:
+        - lat1, lon1: 첫 번째 지점의 위도/경도
+        - lat2, lon2: 두 번째 지점의 위도/경도
+
+        Returns:
+        - 거리 (미터 단위)
+        """
+        # 각도를 라디안으로 변환
+        lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+        # Haversine 공식
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+        a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+        c = 2 * asin(sqrt(a))
+
+        # 지구 반경 (미터)
+        r = 6371000
+
+        return c * r
+
+    async def verify_offline_campaign_location(
+        self,
+        campaign_id: int,
+        user_lat: float,
+        user_lng: float,
+        timestamp: Optional[datetime] = None
+    ) -> Dict[str, Any]:
+        """
+        오프라인 캠페인 위치 및 시간 검증
+
+        Parameters:
+        - campaign_id: 캠페인 ID
+        - user_lat: 사용자 위도
+        - user_lng: 사용자 경도
+        - timestamp: 인증 시간 (기본값: 현재 시간)
+
+        Returns:
+        - {
+            "is_valid": bool,
+            "reason": str,
+            "distance": float (optional),
+            "verified_at": str (optional)
+          }
+        """
+        if timestamp is None:
+            timestamp = datetime.now()
+
+        # 1. 캠페인 조회
+        campaign_repo = CampaignRepository()
+        campaign = await campaign_repo.get_campaign_by_id(campaign_id)
+
+        if not campaign:
+            return {"is_valid": False, "reason": "캠페인을 찾을 수 없습니다"}
+
+        # 2. 온라인 캠페인은 위치 검증 불필요
+        if campaign.get("campaign_type") != "OFFLINE":
+            return {"is_valid": True, "reason": "온라인 캠페인은 위치 검증이 필요하지 않습니다"}
+
+        # 3. 위치 정보 조회
+        location_repo = OfflineLocationRepository()
+        location = location_repo.get_by_campaign_id(campaign_id)
+
+        if not location:
+            return {
+                "is_valid": False,
+                "reason": "오프라인 캠페인이지만 위치 정보가 설정되지 않았습니다"
+            }
+
+        # 4. 기간 검증
+        start_date = campaign.get("start_date")
+        end_date = campaign.get("end_date")
+        if start_date and end_date:
+            # 문자열을 date 객체로 변환
+            if isinstance(start_date, str):
+                from datetime import date
+                start_date = date.fromisoformat(start_date)
+            if isinstance(end_date, str):
+                from datetime import date
+                end_date = date.fromisoformat(end_date)
+
+            current_date = timestamp.date()
+            if not (start_date <= current_date <= end_date):
+                return {
+                    "is_valid": False,
+                    "reason": f"캠페인 기간이 아닙니다 ({start_date} ~ {end_date})"
+                }
+
+        # 5. 시간대 검증 (일일 시작/종료 시간)
+        daily_start = location.get("daily_start_time")
+        daily_end = location.get("daily_end_time")
+        if daily_start and daily_end:
+            current_time = timestamp.time()
+            # time 객체 비교 (문자열이면 파싱)
+            if isinstance(daily_start, str):
+                from datetime import time as time_class
+                hour, minute, *rest = daily_start.split(":")
+                daily_start = time_class(int(hour), int(minute))
+            if isinstance(daily_end, str):
+                from datetime import time as time_class
+                hour, minute, *rest = daily_end.split(":")
+                daily_end = time_class(int(hour), int(minute))
+
+            if not (daily_start <= current_time <= daily_end):
+                return {
+                    "is_valid": False,
+                    "reason": f"캠페인 운영 시간이 아닙니다 ({daily_start} ~ {daily_end})"
+                }
+
+        # 6. 위치 검증 (Haversine 거리 계산)
+        distance = self.calculate_distance(
+            user_lat, user_lng,
+            float(location["location_lat"]), float(location["location_lng"])
+        )
+
+        location_radius = location.get("location_radius", 100)
+        if distance > location_radius:
+            return {
+                "is_valid": False,
+                "reason": f"캠페인 장소에서 {int(distance)}m 떨어져 있습니다 (허용: {location_radius}m)",
+                "distance": distance
+            }
+
+        # 7. 모든 검증 통과
+        return {
+            "is_valid": True,
+            "reason": "위치 및 시간 검증 성공",
+            "distance": distance,
+            "verified_at": timestamp.isoformat(),
+            "location_address": location.get("location_address")
+        }
