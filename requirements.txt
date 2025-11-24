@@ -4,3 +4,10 @@ python-dotenv
 supabase
 uvicorn[standard]
 sentence-transformers
+playwright
+
+langchain-google-genai
+langchain-core
+langchain-community
+langgraph
+tavily-python

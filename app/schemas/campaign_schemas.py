@@ -8,13 +8,13 @@ from enum import Enum
 # ===== Campaign Enums =====
 class CampaignCategory(str, Enum):
     """캠페인 카테고리"""
-    RECYCLING = "RECYCLING"           # 재활용/분리수거
-    TRANSPORTATION = "TRANSPORTATION"  # 대중교통/자전거
-    ENERGY = "ENERGY"                 # 에너지 절약
-    ZERO_WASTE = "ZERO_WASTE"         # 제로웨이스트/다회용기
-    CONSERVATION = "CONSERVATION"     # 자연보호/환경정화
-    EDUCATION = "EDUCATION"           # 교육/세미나
-    OTHER = "OTHER"                   # 기타
+    RECYCLING = "재활용"              # 재활용/분리수거
+    TRANSPORTATION = "대중교통"        # 대중교통/자전거
+    ENERGY = "에너지절약"             # 에너지 절약
+    ZERO_WASTE = "제로웨이스트"        # 제로웨이스트/다회용기
+    CONSERVATION = "자연보호"          # 자연보호/환경정화
+    EDUCATION = "교육"                # 교육/세미나
+    OTHER = "기타"                    # 기타
 
 
 class CampaignStatus(str, Enum):
@@ -46,7 +46,7 @@ class OfflineCampaignLocationBase(BaseModel):
     location_radius: int = Field(100, description="허용 반경 (미터)")
     location_address: Optional[str] = Field(None, description="사람이 읽을 수 있는 주소")
     daily_start_time: Optional[time] = Field(None, description="일일 시작 시간 (예: 09:00)")
-    daily_end_time: Optional[time] = Field(None, description="일일 종료 시간 (예: 18:00)")
+    daily_end_time: Optional[time] = Field(None, description="일일 종료 시간 (예: 예: 18:00)")
 
 
 class OfflineCampaignLocationResponse(OfflineCampaignLocationBase):

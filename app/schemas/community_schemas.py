@@ -1,5 +1,5 @@
 """Community (Post) 관련 Pydantic 스키마"""
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, Dict, Any
 from uuid import UUID
 from datetime import datetime
@@ -20,6 +20,7 @@ class PostCreate(PostBase):
 
 class PostUpdate(BaseModel):
     """Post 업데이트 스키마"""
+    user_id: UUID  # 권한 검증용
     title: Optional[str] = None
     content: Optional[str] = None
     image_url: Optional[str] = None
@@ -34,8 +35,12 @@ class PostResponse(PostBase):
     created_at: datetime
     profiles: Optional[Dict[str, Any]] = None  # user_img, username 포함
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: lambda v: str(v)
+        }
+    )
 
 
 # ===== Comment 스키마 =====
@@ -51,17 +56,31 @@ class CommentCreate(CommentBase):
 
 class CommentUpdate(BaseModel):
     """Comment 업데이트 스키마"""
+    user_id: UUID  # 권한 검증용
     content: str
 
 
-class Comment(CommentBase):
+class PostDelete(BaseModel):
+    """Post 삭제 스키마"""
+    user_id: UUID
+
+
+class CommentDelete(BaseModel):
+    """Comment 삭제 스키마"""
+    user_id: UUID
+
+
+class CommentResponse(CommentBase):
     """Comment 응답 스키마"""
     id: int
-    post_id: int
     user_id: UUID
+    post_id: int
     created_at: datetime
     profiles: Optional[Dict[str, Any]] = None  # user_img, username 포함
 
-    class Config:
-        from_attributes = True
-
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: lambda v: str(v)
+        }
+    )

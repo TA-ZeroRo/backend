@@ -9,7 +9,9 @@ from app.repository.mission_template_repository import MissionTemplateRepository
 from app.repository.mission_log_repository import MissionLogRepository
 from app.repository.user_repository import UserRepository
 from app.repository.point_log_repository import PointLogRepository
-from app.services.rpa_core import submit_eco_mileage_form
+# Deprecated: 2025-01-22 - Moved to WebView RPA
+# from app.repository.rpa_config_repository import RPAConfigRepository
+# from app.services.rpa_core import submit_eco_mileage_form, submit_with_hybrid_config
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,8 @@ class CampaignAgentService:
         self.mission_log_repo = MissionLogRepository()
         self.user_repo = UserRepository()
         self.point_log_repo = PointLogRepository()
+        # Deprecated: 2025-01-22 - Moved to WebView RPA
+        # self.rpa_config_repo = RPAConfigRepository()
 
     async def start_campaign(
         self,
@@ -65,10 +69,10 @@ class CampaignAgentService:
             # 캠페인의 미션 템플릿 조회
             templates = await self.mission_template_repo.get_by_campaign_id(campaign_id)
             if not templates:
-                logger.warning(f"No mission templates found for campaign {campaign_id}")
+                logger.warning(f"캠페인 미션이 존재하지 않습니다. {campaign_id}")
                 return {
                     "success": False,
-                    "error": "No missions available for this campaign"
+                    "error": "캠페인 미션이 존재하지 않습니다."
                 }
 
             # 각 미션 템플릿에 대한 로그 생성
@@ -172,31 +176,69 @@ class CampaignAgentService:
 
             logger.info(f"Starting RPA submission for mission log {mission_log_id}")
 
-            # 미션 템플릿 조회 (campaign_id 가져오기 위함)
+            # 미션 템플릿 조회하여 RPA 설정 확인
             template = await self.mission_template_repo.get_template_by_id(
                 mission_log['mission_template_id']
             )
+
             if not template:
-                logger.error(f"Mission template {mission_log['mission_template_id']} not found")
+                logger.error(f"Mission template not found for log {mission_log_id}")
                 return {
                     "success": False,
                     "error": "Mission template not found"
                 }
 
-            # 캠페인 조회 (campaign_url 가져오기 위함)
+            # Campaign 조회 (RPA 폼 설정 포함)
             campaign = await self.campaign_repo.get_campaign_by_id(template['campaign_id'])
-            if not campaign or not campaign.get('campaign_url'):
-                logger.error(f"Campaign {template['campaign_id']} or campaign_url not found")
+
+            if not campaign:
+                logger.error(f"Campaign not found for template {template['id']}")
                 return {
                     "success": False,
-                    "error": "Campaign URL not found"
+                    "error": "Campaign not found"
                 }
 
-            campaign_url = campaign['campaign_url']
-            logger.info(f"Using campaign URL: {campaign_url}")
+            # Deprecated: 2025-01-22 - Playwright RPA removed, use WebView RPA instead
+            # TODO: WebView RPA로 대체 - Frontend에서 WebView를 통해 사용자가 직접 제출
+            # RPA 실행 방식 결정
+            rpa_result = None
 
-            # RPA 실행
-            rpa_result = await submit_eco_mileage_form(campaign_url, submission_data, credentials)
+            logger.info("RPA auto-submission disabled. Users should submit via WebView.")
+            # Manual submission via WebView - no automatic RPA execution
+            rpa_result = {
+                "success": False,
+                "error": "Automatic RPA submission is deprecated. Please use WebView submission.",
+                "message": "WebView에서 직접 제출해주세요."
+            }
+
+            # # 1. 하이브리드 RPA 사용 (campaign에 rpa_site_config_id와 rpa_form_config가 있으면)
+            # if campaign.get('rpa_site_config_id') and campaign.get('rpa_form_config'):
+            #     logger.info(f"Using hybrid RPA with site_config_id: {campaign['rpa_site_config_id']}")
+
+            #     # RPA 사이트 설정 조회 (로그인용)
+            #     site_config = await self.rpa_config_repo.get_by_id(
+            #         campaign['rpa_site_config_id']
+            #     )
+
+            #     if not site_config:
+            #         logger.error(f"RPA site config not found: {campaign['rpa_site_config_id']}")
+            #         return {
+            #             "success": False,
+            #             "error": "RPA site configuration not found"
+            #         }
+
+            #     # 하이브리드 RPA 실행 (로그인 공유 + 폼 개별)
+            #     rpa_result = await submit_with_hybrid_config(
+            #         campaign_data=campaign,  # rpa_form_config, rpa_field_mapping 등 포함
+            #         site_config=site_config,  # login_config, login_selector_strategies 등 포함
+            #         submission_data=submission_data,
+            #         credentials=credentials
+            #     )
+
+            # # 2. 레거시 RPA 사용 (기존 방식 - 하위 호환성)
+            # else:
+            #     logger.info("Using legacy RPA (submit_eco_mileage_form)")
+            #     rpa_result = await submit_eco_mileage_form(submission_data, credentials)
 
             # RPA 결과에 따라 미션 로그 업데이트
             if rpa_result.get('success'):

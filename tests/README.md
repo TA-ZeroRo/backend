@@ -35,6 +35,15 @@ $env:RPA_MODE="mock"
 python tests/manual/test_rpa_manual.py
 ```
 
+또는 브라우저에서 직접 열기:
+```bash
+# 브라우저에서 직접 열기
+start tests/fixtures/mock_eco_form.html
+
+# 또는 절대 경로로
+C:\Users\goodj\Desktop\TA-ZeroRo\backend\tests\fixtures\mock_eco_form.html
+```
+
 테스트 계정:
 - **ID**: test@example.com
 - **PW**: password123
