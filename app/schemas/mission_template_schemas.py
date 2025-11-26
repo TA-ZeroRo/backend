@@ -10,7 +10,6 @@ class VerificationType(str, Enum):
     IMAGE = "IMAGE"              # 사진 인증
     QUIZ = "QUIZ"                # 퀴즈
     TEXT_REVIEW = "TEXT_REVIEW"  # 소감문
-    RPA_ACTION = "RPA_ACTION"    # RPA 자동 검증
 
 
 class MissionTemplateBase(BaseModel):
@@ -20,7 +19,6 @@ class MissionTemplateBase(BaseModel):
     order: int = Field(default=0, ge=0)
     verification_type: VerificationType
     reward_points: int = Field(default=0, ge=0)
-    rpa_site_config_id: Optional[int] = Field(None, description="RPA 사이트 설정 ID (verification_type=RPA_ACTION일 때 필수)")
 
 
 class MissionTemplateCreate(MissionTemplateBase):
@@ -35,7 +33,6 @@ class MissionTemplateUpdate(BaseModel):
     order: Optional[int] = Field(None, ge=0)
     verification_type: Optional[VerificationType] = None
     reward_points: Optional[int] = Field(None, ge=0)
-    rpa_site_config_id: Optional[int] = None
 
 
 class MissionTemplateResponse(MissionTemplateBase):
