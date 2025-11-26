@@ -52,9 +52,9 @@ class OfflineCampaignLocationBase(BaseModel):
 class OfflineCampaignLocationResponse(OfflineCampaignLocationBase):
     """오프라인 캠페인 위치 정보 응답 스키마"""
     id: int
-    campaign_id: int
-    created_at: datetime
-    updated_at: datetime
+    campaign_id: Optional[int] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
