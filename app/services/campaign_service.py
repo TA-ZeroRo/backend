@@ -14,7 +14,8 @@ class CampaignService:
         region: Optional[str] = None,
         category: Optional[str] = None,
         status: Optional[str] = None,
-        offset: int = 0
+        offset: int = 0,
+        limit: int = 20
     ) -> Dict[str, List[Dict[str, Any]]]:
         """
         캠페인 목록 조회
@@ -24,12 +25,11 @@ class CampaignService:
         - category: 카테고리 필터
         - status: 상태 필터 (기본: ACTIVE)
         - offset: 페이지네이션 오프셋
+        - limit: 페이지당 조회 개수 (기본: 20)
 
         Returns:
         - {"campaigns": [...]}
         """
-        limit = 20  # 페이지당 20개
-
         campaigns = await self.campaign_repo.get_all_campaigns(
             region=region,
             category=category,
