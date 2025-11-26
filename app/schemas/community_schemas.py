@@ -42,6 +42,7 @@ class PostResponse(PostBase):
         }
     )
 
+
 # ===== Comment 스키마 =====
 class CommentBase(BaseModel):
     """Comment 기본 스키마"""
