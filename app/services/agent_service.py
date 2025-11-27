@@ -338,8 +338,17 @@ You: "네, 맞아요! 계란 껍질은 일반쓰레기로 배출하시면 됩니
                 # content를 항상 문자열로 변환
                 if isinstance(last_message.content, str):
                     response_message = last_message.content
+                elif isinstance(last_message.content, list):
+                    # 리스트인 경우 'text' 타입의 content만 추출
+                    text_parts = []
+                    for item in last_message.content:
+                        if isinstance(item, dict) and item.get('type') == 'text':
+                            text_parts.append(item.get('text', ''))
+                        elif isinstance(item, str):
+                            text_parts.append(item)
+                    response_message = ''.join(text_parts)
                 else:
-                    # content가 다른 타입(리스트, 딕셔너리 등)인 경우 문자열로 변환
+                    # 기타 타입은 문자열로 변환
                     response_message = str(last_message.content)
             else:
                 response_message = "응답을 생성할 수 없었습니다."

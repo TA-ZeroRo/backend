@@ -1,9 +1,17 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
-from uuid import UUID
+from pydantic import BaseModel
 from app.services.verification_service import VerificationService
 
 router = APIRouter()
 verification_service = VerificationService()
+
+
+# ===== 위치 검증 요청 스키마 =====
+class LocationVerificationRequest(BaseModel):
+    """위치 검증 요청"""
+    campaign_id: int
+    latitude: float
+    longitude: float
 
 # @router.post("/image")
 # async def verify_image(image_data: dict):
@@ -126,3 +134,35 @@ async def create_quiz():
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
 
+
+@router.post("/location")
+async def verify_location(request: LocationVerificationRequest):
+    """
+    오프라인 캠페인의 위치 검증
+
+    Request Body:
+    - campaign_id: 캠페인 ID
+    - latitude: 사용자 현재 위도
+    - longitude: 사용자 현재 경도
+
+    Response:
+    - is_valid: 검증 성공 여부
+    - reason: 검증 결과 메시지
+    - distance: 캠페인 장소와의 거리 (미터)
+    - verified_at: 검증 시간
+    - location_address: 캠페인 장소 주소
+    """
+    try:
+        # 위치 검증 수행
+        result = await verification_service.verify_offline_campaign_location(
+            campaign_id=request.campaign_id,
+            user_lat=request.latitude,
+            user_lng=request.longitude
+        )
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"위치 검증 중 오류가 발생했습니다: {str(e)}")

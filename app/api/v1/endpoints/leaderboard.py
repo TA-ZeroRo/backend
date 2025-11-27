@@ -1,20 +1,41 @@
-from fastapi import APIRouter, HTTPException
-from typing import List
+from fastapi import APIRouter, HTTPException, Query
+from typing import List, Optional
 from uuid import UUID
 from app.services.leaderboard_service import LeaderboardService
-from app.schemas.leaderboard_schemas import LeaderboardUserResponse
+from app.schemas.leaderboard_schemas import LeaderboardUserResponse, LeaderboardResponse
 
 router = APIRouter()
 leaderboard_service = LeaderboardService()
 
-@router.get("/ranking", response_model=List[LeaderboardUserResponse])
-async def get_leaderboard_ranking():
+@router.get("/ranking", response_model=LeaderboardResponse)
+async def get_leaderboard_ranking(
+    user_id: Optional[str] = Query(None, description="내 순위를 조회할 사용자 ID (Optional)")
+):
     """
     리더보드 순위를 가져옵니다.
+
+    Args:
+        user_id: 내 순위를 조회할 사용자 ID (Optional)
+
+    Returns:
+        LeaderboardResponse: {
+            "leaderboard": [...],  # 상위 50명 랭킹
+            "my_rank": {...}       # 내 순위 정보 (user_id가 있을 경우)
+        }
     """
     try:
-        result = await leaderboard_service.get_leaderboard()
-        return result["leaderboard"]
+        # user_id가 문자열로 제공된 경우 UUID로 변환
+        user_uuid = None
+        if user_id:
+            try:
+                user_uuid = UUID(user_id)
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid user_id format")
+
+        result = await leaderboard_service.get_leaderboard(user_id=user_uuid)
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
