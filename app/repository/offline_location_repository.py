@@ -33,7 +33,7 @@ class OfflineLocationRepository(BaseRepository):
 
         Args:
             campaign_id: 캠페인 ID
-            location_data: 위치 정보 (lat, lng, radius, address, start_time, end_time)
+            location_data: 위치 정보 (lat, lng, radius, address)
 
         Returns:
             생성된 위치 정보

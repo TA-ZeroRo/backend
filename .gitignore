@@ -5,3 +5,6 @@ demo.py
 __pycache__/
 venv/*
 .claude/*
+
+# MCP configuration (contains tokens)
+.mcp.json

@@ -10,6 +10,7 @@ class VerificationType(str, Enum):
     IMAGE = "IMAGE"              # 사진 인증
     QUIZ = "QUIZ"                # 퀴즈
     TEXT_REVIEW = "TEXT_REVIEW"  # 소감문
+    LOCATION = "LOCATION"        # 위치 인증
 
 
 class MissionTemplateBase(BaseModel):
