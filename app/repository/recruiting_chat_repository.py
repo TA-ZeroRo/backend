@@ -14,11 +14,11 @@ class RecruitingChatRepository(BaseRepository):
 
     # ===== RecruitingPost 관련 메서드 =====
     async def get_recruiting_post_by_id(self, post_id: int, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
-        """리크루팅 게시글 ID로 조회 (프로필 정보 포함)"""
+        """리크루팅 게시글 ID로 조회 (프로필 정보 및 캠페인 정보 포함)"""
         response = (
             self.supabase
             .table(self.RECRUITING_POST_TABLE)
-            .select("*, profiles(user_img, username)")
+            .select("*, profiles(user_img, username), campaigns(title, image_url)")
             .eq("id", post_id)
             .execute()
         )
@@ -54,11 +54,11 @@ class RecruitingChatRepository(BaseRepository):
         is_recruiting: Optional[bool] = None,
         user_id: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """페이지네이션 및 필터링이 적용된 리크루팅 게시글 조회"""
+        """페이지네이션 및 필터링이 적용된 리크루팅 게시글 조회 (캠페인 정보 포함)"""
         query = (
             self.supabase
             .table(self.RECRUITING_POST_TABLE)
-            .select("*, profiles(user_img, username)")
+            .select("*, profiles(user_img, username), campaigns(title, image_url)")
             .order("created_at", desc=True)
         )
 
@@ -127,11 +127,11 @@ class RecruitingChatRepository(BaseRepository):
 
         recruiting_post_ids = [r["recruiting_post_id"] for r in room_response.data]
 
-        # 3. 해당 리크루팅 게시글 조회
+        # 3. 해당 리크루팅 게시글 조회 (캠페인 정보 포함)
         query = (
             self.supabase
             .table(self.RECRUITING_POST_TABLE)
-            .select("*, profiles(user_img, username)")
+            .select("*, profiles(user_img, username), campaigns(title, image_url)")
             .in_("id", recruiting_post_ids)
             .order("created_at", desc=True)
             .range(offset, offset + limit - 1)
