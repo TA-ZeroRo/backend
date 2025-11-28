@@ -207,6 +207,24 @@ class RecruitingChatRepository(BaseRepository):
         )
         return response.data is not None
 
+    async def decrement_current_members(self, post_id: int) -> bool:
+        """현재 참여 인원 감소"""
+        # 현재 게시글 조회
+        post = await self.get_recruiting_post_by_id(post_id)
+        if not post:
+            return False
+
+        # current_members 감소 (최소 0)
+        new_count = max(0, post["current_members"] - 1)
+        response = (
+            self.supabase
+            .table(self.RECRUITING_POST_TABLE)
+            .update({"current_members": new_count})
+            .eq("id", post_id)
+            .execute()
+        )
+        return response.data is not None
+
     # ===== ChatRoom 관련 메서드 =====
     async def get_chat_room_by_id(self, room_id: int) -> Optional[Dict[str, Any]]:
         """채팅방 ID로 조회"""
@@ -278,6 +296,21 @@ class RecruitingChatRepository(BaseRepository):
             .execute()
         )
         return response.data is not None and len(response.data) > 0
+
+    async def remove_participant(self, chat_room_id: int, user_id: str) -> bool:
+        """채팅방에서 참여자 제거 (강퇴)"""
+        try:
+            response = (
+                self.supabase
+                .table(self.PARTICIPANT_TABLE)
+                .delete()
+                .eq("chat_room_id", chat_room_id)
+                .eq("user_id", user_id)
+                .execute()
+            )
+            return response.data is not None and len(response.data) > 0
+        except Exception:
+            return False
 
     async def get_participants_by_room_id(self, chat_room_id: int) -> List[Dict[str, Any]]:
         """채팅방 참여자 목록 조회 (프로필 정보 포함)"""
