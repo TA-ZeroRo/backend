@@ -2,6 +2,8 @@
 from typing import Dict, Any, List, Optional
 from uuid import UUID
 from app.repository.mission_log_repository import MissionLogRepository
+from app.repository.point_log_repository import PointLogRepository
+from app.repository.user_repository import UserRepository
 
 
 class MissionLogService:
@@ -9,6 +11,8 @@ class MissionLogService:
 
     def __init__(self):
         self.mission_log_repo = MissionLogRepository()
+        self.point_log_repo = PointLogRepository()
+        self.user_repo = UserRepository()
 
     async def get_mission_logs_by_user(self, user_id: UUID) -> List[Dict[str, Any]]:
         """
@@ -178,6 +182,10 @@ class MissionLogService:
                 f"미션 로그 ID {log_id}가 존재하지 않거나 업데이트할 수 없습니다."
             )
 
+        # COMPLETED 상태로 변경된 경우 포인트 지급 (중복 지급 방지)
+        if not has_error and current_status != "COMPLETED":
+            await self._award_points_for_completion(current_log)
+
         # 업데이트 후 JOIN된 데이터를 포함하여 다시 조회
         return await self.mission_log_repo.get_log_by_id(log_id)
 
@@ -233,5 +241,74 @@ class MissionLogService:
                 f"미션 로그 ID {log_id}가 존재하지 않거나 업데이트할 수 없습니다."
             )
 
+        # COMPLETED 상태로 변경된 경우 포인트 지급 (중복 지급 방지)
+        if status == "COMPLETED" and current_log.get("status") != "COMPLETED":
+            await self._award_points_for_completion(current_log)
+
         # 업데이트 후 JOIN된 데이터를 포함하여 다시 조회
         return await self.mission_log_repo.get_log_by_id(log_id)
+
+    async def _award_points_for_completion(self, mission_log: Dict[str, Any]) -> None:
+        """
+        미션 완료 시 포인트 지급
+
+        Parameters:
+        - mission_log: 미션 로그 정보 (mission_templates 정보 포함)
+        """
+        try:
+            # 사용자 ID 추출
+            user_id_str = mission_log.get("user_id")
+            if not user_id_str:
+                return
+
+            user_id = UUID(user_id_str)
+
+            # 미션 템플릿에서 보상 포인트 가져오기
+            mission_template = mission_log.get("mission_templates")
+            if not mission_template:
+                # mission_templates가 JOIN되지 않은 경우 직접 조회
+                template_id = mission_log.get("mission_template_id")
+                if not template_id:
+                    return
+                
+                from app.repository.mission_template_repository import MissionTemplateRepository
+                template_repo = MissionTemplateRepository()
+                mission_template = await template_repo.get_template_by_id(template_id)
+                if not mission_template:
+                    return
+
+            reward_points = mission_template.get("reward_points", 0)
+            if reward_points <= 0:
+                # 보상 포인트가 없으면 지급하지 않음
+                return
+
+            # 현재 사용자 정보 조회 (total_points 확인)
+            user_data = await self.user_repo.get_user_by_id(user_id)
+            if not user_data:
+                return
+
+            current_total_points = user_data.get("total_points", 0)
+
+            # 1. 포인트 로그 생성
+            point_log = await self.point_log_repo.create_point_log(
+                user_id=user_id,
+                point=reward_points
+            )
+            if not point_log:
+                raise ValueError("포인트 로그 생성에 실패했습니다.")
+
+            # 2. 사용자 total_points 업데이트
+            new_total_points = current_total_points + reward_points
+            updated_user = await self.user_repo.update_user(
+                user_id=user_id,
+                user_data={"total_points": new_total_points}
+            )
+            if not updated_user:
+                raise ValueError("사용자 포인트 업데이트에 실패했습니다.")
+
+        except Exception as e:
+            # 포인트 지급 실패는 로그만 남기고 예외를 던지지 않음
+            # (미션 완료 자체는 성공했으므로)
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"미션 완료 포인트 지급 실패: {str(e)}")
