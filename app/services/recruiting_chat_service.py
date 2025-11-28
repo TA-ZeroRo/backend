@@ -9,7 +9,8 @@ from app.schemas.recruiting_chat_schemas import (
     RecruitingPostUpdate,
     RecruitingPostDelete,
     ChatMessageCreate,
-    JoinRecruitingRequest
+    JoinRecruitingRequest,
+    KickParticipantRequest
 )
 
 
@@ -291,3 +292,42 @@ class RecruitingChatService:
         # 참여자 목록 조회
         participants = await self.recruiting_repo.get_participants_by_room_id(room_id)
         return participants
+
+    async def kick_participant(self, post_id: int, kick_data: KickParticipantRequest) -> Dict[str, str]:
+        """참여자 강퇴 (주최자만 가능)"""
+        # 게시글 존재 확인
+        post = await self.recruiting_repo.get_recruiting_post_by_id(post_id)
+        if not post:
+            raise HTTPException(status_code=404, detail="해당 리크루팅 게시글을 찾을 수 없습니다.")
+
+        # 주최자 권한 검증
+        if str(post.get("user_id")) != str(kick_data.host_user_id):
+            raise HTTPException(status_code=403, detail="참여자를 강퇴할 권한이 없습니다.")
+
+        # 자기 자신 강퇴 방지
+        if str(kick_data.host_user_id) == str(kick_data.target_user_id):
+            raise HTTPException(status_code=400, detail="자기 자신을 강퇴할 수 없습니다.")
+
+        # 채팅방 조회
+        chat_room = await self.recruiting_repo.get_chat_room_by_recruiting_post_id(post_id)
+        if not chat_room:
+            raise HTTPException(status_code=404, detail="해당 채팅방을 찾을 수 없습니다.")
+
+        # 대상이 참여자인지 확인
+        is_participant = await self.recruiting_repo.is_user_participant(
+            chat_room["id"], str(kick_data.target_user_id)
+        )
+        if not is_participant:
+            raise HTTPException(status_code=400, detail="해당 사용자는 참여자가 아닙니다.")
+
+        # 참여자 제거
+        success = await self.recruiting_repo.remove_participant(
+            chat_room["id"], str(kick_data.target_user_id)
+        )
+        if not success:
+            raise HTTPException(status_code=500, detail="강퇴에 실패했습니다.")
+
+        # 현재 참여 인원 감소
+        await self.recruiting_repo.decrement_current_members(post_id)
+
+        return {"message": "참여자가 성공적으로 강퇴되었습니다."}

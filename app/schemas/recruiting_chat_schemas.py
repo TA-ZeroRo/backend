@@ -128,3 +128,10 @@ class ChatMessageResponse(ChatMessageBase):
 class JoinRecruitingRequest(BaseModel):
     """리크루팅 참여 요청 스키마"""
     user_id: UUID
+
+
+# ===== Kick 스키마 =====
+class KickParticipantRequest(BaseModel):
+    """참여자 강퇴 요청 스키마"""
+    host_user_id: UUID  # 주최자 ID (권한 검증용)
+    target_user_id: UUID  # 강퇴 대상 ID

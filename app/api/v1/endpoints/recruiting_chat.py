@@ -11,7 +11,8 @@ from app.schemas.recruiting_chat_schemas import (
     ChatMessageCreate,
     ChatMessageResponse,
     ChatRoomResponse,
-    JoinRecruitingRequest
+    JoinRecruitingRequest,
+    KickParticipantRequest
 )
 
 router = APIRouter()
@@ -97,6 +98,19 @@ async def join_recruiting(post_id: int, join_data: JoinRecruitingRequest):
     - join_data (JoinRecruitingRequest): 참여 요청 데이터 (user_id 포함)
     """
     return await recruiting_service.join_recruiting(post_id, join_data)
+
+
+@router.delete("/posts/{post_id}/kick")
+async def kick_participant(post_id: int, kick_data: KickParticipantRequest):
+    """
+    리크루팅 참여자를 강퇴합니다.
+    주최자만 강퇴할 수 있습니다.
+
+    Parameters:
+    - post_id (int): 리크루팅 게시글 ID
+    - kick_data (KickParticipantRequest): 강퇴 요청 데이터 (host_user_id, target_user_id 포함)
+    """
+    return await recruiting_service.kick_participant(post_id, kick_data)
 
 # ----------------------------
 # --- END: 리크루팅 게시글 API ---
