@@ -7,7 +7,7 @@ class CampaignRepository(BaseRepository):
     """캠페인 관련 데이터베이스 작업을 처리하는 Repository"""
 
     TABLE_NAME = "campaigns"
-    VIEW_NAME = "campaigns_with_location"  # View 사용
+    LOCATION_TABLE = "offline_campaign_locations"
 
     async def get_all_campaigns(
         self,
@@ -32,8 +32,10 @@ class CampaignRepository(BaseRepository):
         Returns:
         - 캠페인 목록 (location 정보 포함)
         """
-        # View 사용 (자동으로 location 정보 JOIN됨)
-        query = self.supabase.table(self.VIEW_NAME).select("*")
+        # campaigns 테이블에서 offline_campaign_locations를 LEFT JOIN으로 조회
+        query = self.supabase.table(self.TABLE_NAME).select(
+            "*, offline_campaign_locations(id, location_lat, location_lng, location_radius, location_address)"
+        )
 
         # 필터링 적용
         if region:
@@ -71,9 +73,8 @@ class CampaignRepository(BaseRepository):
         Returns:
         - 캠페인 정보 (location 포함) 또는 None
         """
-        # View 사용
-        response = self.supabase.table(self.VIEW_NAME)\
-            .select("*")\
+        response = self.supabase.table(self.TABLE_NAME)\
+            .select("*, offline_campaign_locations(id, location_lat, location_lng, location_radius, location_address)")\
             .eq("id", campaign_id)\
             .execute()
 
@@ -85,42 +86,24 @@ class CampaignRepository(BaseRepository):
 
     def _process_campaign_locations(self, campaigns: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
-        View 결과를 처리하여 location 객체로 그룹화
+        조회 결과를 처리하여 location 객체로 변환
 
         Parameters:
-        - campaigns: View에서 조회한 캠페인 목록 (평평한 구조)
+        - campaigns: 조회한 캠페인 목록
 
         Returns:
-        - location 필드가 중첩된 캠페인 목록
+        - location 필드가 정리된 캠페인 목록
         """
         processed = []
         for campaign in campaigns:
-            # location 관련 필드들을 별도 객체로 분리
-            location_fields = [
-                "location_id", "location_lat", "location_lng",
-                "location_radius", "location_address",
-                "daily_start_time", "daily_end_time"
-            ]
+            # Supabase가 반환하는 중첩된 offline_campaign_locations를 location으로 변환
+            location_data = campaign.pop("offline_campaign_locations", None)
 
-            # location 필드가 모두 None이면 location 객체 자체를 None으로
-            if all(campaign.get(field) is None for field in location_fields):
-                campaign["location"] = None
-            else:
-                # location 객체 생성
-                campaign["location"] = {
-                    "id": campaign.pop("location_id", None),
-                    "location_lat": campaign.pop("location_lat", None),
-                    "location_lng": campaign.pop("location_lng", None),
-                    "location_radius": campaign.pop("location_radius", None),
-                    "location_address": campaign.pop("location_address", None),
-                    "daily_start_time": campaign.pop("daily_start_time", None),
-                    "daily_end_time": campaign.pop("daily_end_time", None),
-                }
+            # location_data가 리스트인 경우 첫 번째 요소 사용 (1:1 관계)
+            if isinstance(location_data, list):
+                location_data = location_data[0] if location_data else None
 
-            # 이미 pop한 필드들 제거 (남아있으면)
-            for field in location_fields:
-                campaign.pop(field, None)
-
+            campaign["location"] = location_data
             processed.append(campaign)
 
         return processed

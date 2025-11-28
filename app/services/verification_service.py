@@ -6,7 +6,7 @@ from google.genai import types
 import json
 from enum import IntEnum
 from dataclasses import dataclass
-from datetime import datetime, time
+from datetime import datetime
 from math import radians, cos, sin, asin, sqrt
 
 from app.core.config import get_gemini_api_key
@@ -293,29 +293,25 @@ class VerificationService:
         self,
         campaign_id: int,
         user_lat: float,
-        user_lng: float,
-        timestamp: Optional[datetime] = None
+        user_lng: float
     ) -> Dict[str, Any]:
         """
-        오프라인 캠페인 위치 및 시간 검증
+        오프라인 캠페인 위치 검증
 
         Parameters:
         - campaign_id: 캠페인 ID
         - user_lat: 사용자 위도
         - user_lng: 사용자 경도
-        - timestamp: 인증 시간 (기본값: 현재 시간)
 
         Returns:
         - {
             "is_valid": bool,
             "reason": str,
             "distance": float (optional),
-            "verified_at": str (optional)
+            "verified_at": str (optional),
+            "location_address": str (optional)
           }
         """
-        if timestamp is None:
-            timestamp = datetime.now()
-
         # 1. 캠페인 조회
         campaign_repo = CampaignRepository()
         campaign = await campaign_repo.get_campaign_by_id(campaign_id)
@@ -337,47 +333,25 @@ class VerificationService:
                 "reason": "오프라인 캠페인이지만 위치 정보가 설정되지 않았습니다"
             }
 
-        # 4. 기간 검증
+        # 4. 캠페인 기간 검증
         start_date = campaign.get("start_date")
         end_date = campaign.get("end_date")
         if start_date and end_date:
+            from datetime import date
             # 문자열을 date 객체로 변환
             if isinstance(start_date, str):
-                from datetime import date
                 start_date = date.fromisoformat(start_date)
             if isinstance(end_date, str):
-                from datetime import date
                 end_date = date.fromisoformat(end_date)
 
-            current_date = timestamp.date()
+            current_date = date.today()
             if not (start_date <= current_date <= end_date):
                 return {
                     "is_valid": False,
                     "reason": f"캠페인 기간이 아닙니다 ({start_date} ~ {end_date})"
                 }
 
-        # 5. 시간대 검증 (일일 시작/종료 시간)
-        daily_start = location.get("daily_start_time")
-        daily_end = location.get("daily_end_time")
-        if daily_start and daily_end:
-            current_time = timestamp.time()
-            # time 객체 비교 (문자열이면 파싱)
-            if isinstance(daily_start, str):
-                from datetime import time as time_class
-                hour, minute, *rest = daily_start.split(":")
-                daily_start = time_class(int(hour), int(minute))
-            if isinstance(daily_end, str):
-                from datetime import time as time_class
-                hour, minute, *rest = daily_end.split(":")
-                daily_end = time_class(int(hour), int(minute))
-
-            if not (daily_start <= current_time <= daily_end):
-                return {
-                    "is_valid": False,
-                    "reason": f"캠페인 운영 시간이 아닙니다 ({daily_start} ~ {daily_end})"
-                }
-
-        # 6. 위치 검증 (Haversine 거리 계산)
+        # 5. 위치 검증 (Haversine 거리 계산)
         distance = self.calculate_distance(
             user_lat, user_lng,
             float(location["location_lat"]), float(location["location_lng"])
@@ -391,11 +365,11 @@ class VerificationService:
                 "distance": distance
             }
 
-        # 7. 모든 검증 통과
+        # 6. 모든 검증 통과
         return {
             "is_valid": True,
-            "reason": "위치 및 시간 검증 성공",
+            "reason": "위치 검증 성공",
             "distance": distance,
-            "verified_at": timestamp.isoformat(),
+            "verified_at": datetime.now().isoformat(),
             "location_address": location.get("location_address")
         }

@@ -162,8 +162,7 @@ class ReportRepository(BaseRepository):
         self,
         user_id: UUID,
         year: int,
-        month: int,
-        points_earned: int = 0
+        month: int
     ) -> Optional[Dict[str, Any]]:
         """
         월간 보고서 조회 기록 생성
@@ -172,7 +171,6 @@ class ReportRepository(BaseRepository):
         - user_id: 사용자 ID
         - year: 연도
         - month: 월
-        - points_earned: 획득 포인트
 
         Returns:
         - 생성된 기록 또는 None
@@ -180,8 +178,7 @@ class ReportRepository(BaseRepository):
         action_type = f"MONTHLY_REPORT_VIEW_{year}_{month:02d}"
         data = {
             "user_id": str(user_id),
-            "action_type": action_type,
-            "points_earned": points_earned
+            "action_type": action_type
         }
         return await self.create("activity_log", data)
 
