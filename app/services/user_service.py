@@ -72,3 +72,45 @@ class UserService:
             raise HTTPException(status_code=500, detail="유저 삭제에 실패했습니다.")
 
         return {"message": "유저가 성공적으로 삭제되었습니다."}
+
+    async def unlock_character(self, user_id: UUID, character_name: str) -> Dict[str, Any]:
+        """캐릭터 해금 (300포인트 차감)"""
+        UNLOCK_COST = 300
+
+        # 사용자 정보 조회
+        user = await self.user_repo.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="해당 user를 찾을 수 없습니다.")
+
+        # 현재 포인트 확인
+        current_points = user.get("total_points", 0)
+        if current_points < UNLOCK_COST:
+            raise HTTPException(
+                status_code=400,
+                detail=f"포인트가 부족합니다. (현재: {current_points}, 필요: {UNLOCK_COST})"
+            )
+
+        # 이미 해금된 캐릭터인지 확인
+        unlocked_characters = user.get("characters", [])
+        if character_name in unlocked_characters:
+            raise HTTPException(status_code=400, detail="이미 해금된 캐릭터입니다.")
+
+        # 포인트 차감 및 캐릭터 추가
+        new_points = current_points - UNLOCK_COST
+        new_characters = unlocked_characters + [character_name]
+
+        update_data = {
+            "total_points": new_points,
+            "characters": new_characters
+        }
+
+        updated_user = await self.user_repo.update_user(user_id, update_data)
+        if not updated_user:
+            raise HTTPException(status_code=500, detail="캐릭터 해금에 실패했습니다.")
+
+        return {
+            "message": "캐릭터가 성공적으로 해금되었습니다.",
+            "character_name": character_name,
+            "remaining_points": new_points,
+            "unlocked_characters": new_characters
+        }
