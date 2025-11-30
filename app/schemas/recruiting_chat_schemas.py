@@ -47,6 +47,7 @@ class RecruitingPostResponse(RecruitingPostBase):
     created_at: datetime
     updated_at: datetime
     profiles: Optional[Dict[str, Any]] = None  # user_img, username 포함
+    campaigns: Optional[Dict[str, Any]] = None  # title, image_url 포함
     chat_room_id: Optional[int] = None  # 채팅방 ID (있는 경우)
     is_participating: bool = False  # 현재 사용자 참여 여부
 
