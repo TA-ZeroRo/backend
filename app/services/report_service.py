@@ -40,6 +40,22 @@ class ReportService:
         Returns:
         - MonthlyReportResponse: 이전 달 보고서 데이터
         """
+        # 사용자 정보 조회 (가입일 확인)
+        user_data = await self.user_repo.get_user_by_id(user_id)
+        if not user_data:
+            raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+
+        # 사용자 가입일
+        created_at = user_data.get("created_at")
+        if not created_at:
+            raise HTTPException(status_code=500, detail="사용자 가입일 정보가 없습니다.")
+
+        # created_at이 문자열인 경우 datetime으로 변환
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+
+        user_join_date = created_at.date()
+
         # 현재 날짜 기준 이전 달 계산
         today = date.today()
 
@@ -51,6 +67,17 @@ class ReportService:
             # 그 외는 이번 년도의 이전 달
             previous_year = today.year
             previous_month = today.month - 1
+
+        # 이전 달의 마지막 날짜
+        _, last_day = monthrange(previous_year, previous_month)
+        previous_month_end = date(previous_year, previous_month, last_day)
+
+        # 사용자가 이전 달 이후에 가입했다면 보고서 없음
+        if user_join_date > previous_month_end:
+            raise HTTPException(
+                status_code=404,
+                detail="아직 생성된 보고서가 없습니다. 가입 후 한 달이 지나면 보고서를 확인할 수 있습니다."
+            )
 
         # 이전 달 보고서 조회
         return await self.get_monthly_report(

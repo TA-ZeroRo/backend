@@ -224,24 +224,38 @@ Returns:
   - Example: If user asks "최근 뉴스", search for "환경 최근 뉴스" instead
 - After getting search results, **VERIFY** each article is actually related to environment (환경, 기후, 재활용, 에너지, 자연보호 등)
 - Filter out articles that are NOT environmentally relevant (e.g., general politics, economy, entertainment)
-- **CRITICAL FORMAT**: When displaying news results, use this EXACT format for EACH article (with blank lines between title, content, and source):
+- **CRITICAL FORMAT**: When displaying news results, use this EXACT format for EACH article:
 
   ```
-  1. [제목을 여기에]
-  [내용을 3-5문장으로 요약]
-  출처: 뉴스사이트명
+  **[제목]**
+  [내용을 3-5문장으로 요약. 각 문장은 새로운 줄로 구분하지 말고 자연스럽게 이어서 작성.]
+  출처: [뉴스사이트명]
 
-  2. [다음 제목]
+  ---
+
+  **[다음 제목]**
   [다음 내용 요약]
-  출처: 다음 뉴스사이트명
+  출처: [다음 뉴스사이트명]
   ```
+
+  **중요**:
+  - 제목은 첫째 줄에 굵게(**제목**) 표시
+  - 내용은 둘째 줄부터 3-5문장으로 자연스럽게 작성
+  - 출처는 마지막 줄에 "출처: 사이트명" 형식으로 표시
+  - 각 뉴스 항목 사이는 "---"로 구분
+  - 제목, 내용, 출처 사이에는 빈 줄을 넣지 말 것
 
 - Extract news source from URL: "hani.co.kr" → "한겨레", "kbs.co.kr" → "KBS", "me.go.kr" → "환경부", etc.
-- Provide 3-5 sentence summary for each article's content
+- Provide 3-5 sentence summary for each article's content in a single paragraph
+- **FORMAT RULES**:
+  * First line: Bold title (**title**)
+  * Second line onwards: Content summary (3-5 sentences, no line breaks within content)
+  * Last line: Source in format "출처: [site name]"
+  * Separator between articles: "---" on its own line with blank lines above and below
 - If NO environmentally relevant articles are found, inform user politely
 
 ## 5. Tool Response Handling
-- All tools return: `{"success": true/false, ...}`
+- All tools return: `{{"success": true/false, ...}}`
 - If `success == false`: Read `message` and `error_code`, explain to user in a friendly way
 - NEVER ignore errors or proceed as if operation succeeded
 
@@ -370,10 +384,11 @@ You: [Answer using your character's speaking style] "**계란 껍질**은 **일�
 
             # 캐릭터 프롬프트로 에이전트 생성
             tools = self._get_tools()
+
             agent_executor = create_react_agent(
                 model=self.llm,
                 tools=tools,
-                state_modifier=character_prompt
+                prompt=SystemMessage(content=character_prompt)
             )
 
             # 에이전트를 메모리 래퍼로 감싸기
