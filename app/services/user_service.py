@@ -187,8 +187,7 @@ class UserService:
         return {
             "personality": {
                 "id": personality["id"],
-                "name": personality["name"],
-                "description": personality["description"]
+                "name": personality["name"]
             },
             "remaining_tickets": new_tickets
         }
