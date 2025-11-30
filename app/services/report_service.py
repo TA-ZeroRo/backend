@@ -30,6 +30,79 @@ class ReportService:
         self.report_repo = ReportRepository()
         self.user_repo = UserRepository()
 
+    async def get_monthly_reports(
+        self,
+        user_id: UUID,
+        limit: int | None = None
+    ) -> list[MonthlyReportResponse]:
+        """
+        여러 월간보고서 조회 (최근순)
+
+        Parameters:
+        - user_id: 사용자 ID
+        - limit: 조회할 보고서 개수 (None이면 가입 월부터 전체)
+
+        Returns:
+        - list[MonthlyReportResponse]: 보고서 목록 (최근순)
+        """
+        # 사용자 정보 조회 (가입 날짜 확인)
+        user_data = await self.user_repo.get_user_by_id(user_id)
+        if not user_data:
+            raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+
+        # 가입 날짜 파싱
+        created_at_str = user_data.get("created_at")
+        if created_at_str:
+            if isinstance(created_at_str, str):
+                created_at = datetime.fromisoformat(created_at_str.replace('Z', '+00:00'))
+            else:
+                created_at = created_at_str
+            signup_year = created_at.year
+            signup_month = created_at.month
+        else:
+            # created_at이 없으면 1년 전부터로 설정
+            signup_year = date.today().year - 1
+            signup_month = date.today().month
+
+        reports = []
+        today = date.today()
+
+        # 현재 월부터 시작 (진행 중인 월 포함)
+        current_year = today.year
+        current_month = today.month
+
+        # limit이 없으면 가입 월부터 전체 조회
+        months_since_signup = (current_year - signup_year) * 12 + (current_month - signup_month) + 1
+        max_months = limit if limit is not None else months_since_signup
+
+        # 이전 달부터 역순으로 조회
+        for i in range(max_months):
+            # i개월 전 계산
+            target_year = current_year
+            target_month = current_month - i
+
+            # 월이 0 이하로 내려가면 작년으로 이동
+            while target_month <= 0:
+                target_month += 12
+                target_year -= 1
+
+            # 가입 월보다 이전이면 중단
+            if target_year < signup_year or (target_year == signup_year and target_month < signup_month):
+                break
+
+            try:
+                report = await self.get_monthly_report(
+                    user_id=user_id,
+                    year=target_year,
+                    month=target_month
+                )
+                reports.append(report)
+            except HTTPException:
+                # 해당 월에 데이터가 없으면 스킵
+                continue
+
+        return reports
+
     async def get_latest_monthly_report(self, user_id: UUID) -> MonthlyReportResponse:
         """
         가장 최근 보고서 조회
