@@ -25,15 +25,18 @@ async def chat_with_agent(request: ChatRequest):
     **Parameters:**
     - user_id (UUID): 사용자 고유 ID
     - message (str): 사용자 메시지
-    - history (List[ChatMessage], optional): 이전 대화 히스토리
+    - selected_character (str, optional): 선택된 캐릭터 ID (기본값: earth_zeroro)
+      - earth_zeroro (지구 제로로)
+      - dust_zeroro (먼지 제로로)
 
     **Returns:**
-    - message (str): AI 응답 메시지
+    - message (str): AI 응답 메시지 (선택한 캐릭터의 말투로)
     """
     try:
         result = await agent_service.chat(
             user_id=request.user_id,
-            message=request.message
+            message=request.message,
+            selected_character=request.selected_character
         )
         return ChatResponse(**result)
     except Exception as e:

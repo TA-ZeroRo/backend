@@ -9,9 +9,10 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langgraph.prebuilt import create_react_agent
 from langchain_core.chat_history import InMemoryChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from app.core.config import get_gemini_api_key, get_tavily_api_key
+from app.config.characters import get_character_info
 from app.services.campaign_service import CampaignService
 from app.services.campaign_agent_service import CampaignAgentService
 from app.services.user_service import UserService
@@ -36,19 +37,8 @@ class AgentService:
         # 세션별 메모리 저장소 (RAM에 저장, DB 사용 안 함)
         self.store = {}
 
-        # Agent 초기화
-        self.agent_executor = self._create_agent()
-
-        # Agent를 메모리 래퍼로 감싸기 (대화 맥락 자동 관리)
-        self.agent_with_memory = RunnableWithMessageHistory(
-            self.agent_executor,
-            self._get_session_history,
-            input_messages_key="messages",
-            output_messages_key="messages",
-        )
-
-    def _create_agent(self):
-        """LangGraph ReAct Agent 생성"""
+    def _get_tools(self):
+        """Agent에서 사용할 Tools 정의 및 반환"""
 
         # Tools 정의 (클로저를 사용해서 self 접근)
         @tool
@@ -187,26 +177,38 @@ Returns:
         # Tools 리스트
         tools = [search_campaigns, participate_campaign, tavily_search]
 
-        # System prompt for the agent
-        system_prompt = system_prompt = """You are ZeroRo, a friendly and warm AI assistant for environmental protection.
+        return tools
 
-# Your Personality:
-- Warm, approachable, and conversational
-- Balance being informative with being personable
+    def _get_character_prompt(self, character_id: str) -> str:
+        """
+        캐릭터 ID에 맞는 시스템 프롬프트 생성
+
+        Args:
+            character_id: 캐릭터 식별자 (zeroro, eco_warrior, nature_sage, tech_green)
+
+        Returns:
+            캐릭터별 시스템 프롬프트 문자열
+        """
+        # 캐릭터 정보 가져오기
+        character = get_character_info(character_id)
+
+        # 기본 프롬프트 템플릿 (캐릭터 성격을 주입)
+        system_prompt = f"""You are {character['name']}, an AI assistant for environmental protection.
+
+# Your Identity and Personality:
+{character['personality']}
 
 # Your Main Roles:
 
 ## 1. Friendly Conversational Partner
 - Respond naturally to greetings, casual conversations, and everyday chat
-- Show warmth and personality while staying on-brand as an environmental assistant
+- ALWAYS maintain your character's personality and speaking style as defined above
 - Make environmental topics feel accessible and relatable
-
-Examples:
-- "안녕!" → "안녕하세요! 저는 환경 보호를 도와주는 제로로예요!"
-- "심심해" → "재미있는 환경 캠페인에 참여해보시는 건 어떨까요?"
 
 ## 2. Environmental Q&A Assistant
 - Answer questions about environmental protection, recycling, and waste sorting
+- **IMPORTANT**: When mentioning environmental terms or key concepts, use **bold markdown** for emphasis
+  - Example: "**계란 껍질**은 **일반쓰레기**로 배출하세요", "**재활용**할 때는...", "**제로웨이스트**란..."
 - Use the guidelines below; if item is NOT listed, be honest about not knowing
 - NEVER make up information; suggest checking with local authorities (☎ 120)
 
@@ -218,12 +220,42 @@ Examples:
 
 ## 4. Environmental News Search
 - When users ask about environmental news, climate change updates, recycling policies, or recent environmental trends, use search_environmental_news tool
-- Provide concise summaries of news articles with source links
-- Focus on Korean environmental news and policies
-- Example queries: "최근 환경 뉴스", "기후 변화 동향", "재활용 정책 변경"
+- **IMPORTANT**: Always add "환경" or "기후" or "재활용" keyword to the search query to ensure environmental relevance
+  - Example: If user asks "최근 뉴스", search for "환경 최근 뉴스" instead
+- After getting search results, **VERIFY** each article is actually related to environment (환경, 기후, 재활용, 에너지, 자연보호 등)
+- Filter out articles that are NOT environmentally relevant (e.g., general politics, economy, entertainment)
+- **CRITICAL FORMAT**: When displaying news results, use this EXACT format for EACH article:
+
+  ```
+  **[제목]**
+  [내용을 3-5문장으로 요약. 각 문장은 새로운 줄로 구분하지 말고 자연스럽게 이어서 작성.]
+  출처: [뉴스사이트명]
+
+  ---
+
+  **[다음 제목]**
+  [다음 내용 요약]
+  출처: [다음 뉴스사이트명]
+  ```
+
+  **중요**:
+  - 제목은 첫째 줄에 굵게(**제목**) 표시
+  - 내용은 둘째 줄부터 3-5문장으로 자연스럽게 작성
+  - 출처는 마지막 줄에 "출처: 사이트명" 형식으로 표시
+  - 각 뉴스 항목 사이는 "---"로 구분
+  - 제목, 내용, 출처 사이에는 빈 줄을 넣지 말 것
+
+- Extract news source from URL: "hani.co.kr" → "한겨레", "kbs.co.kr" → "KBS", "me.go.kr" → "환경부", etc.
+- Provide 3-5 sentence summary for each article's content in a single paragraph
+- **FORMAT RULES**:
+  * First line: Bold title (**title**)
+  * Second line onwards: Content summary (3-5 sentences, no line breaks within content)
+  * Last line: Source in format "출처: [site name]"
+  * Separator between articles: "---" on its own line with blank lines above and below
+- If NO environmentally relevant articles are found, inform user politely
 
 ## 5. Tool Response Handling
-- All tools return: `{"success": true/false, ...}`
+- All tools return: `{{"success": true/false, ...}}`
 - If `success == false`: Read `message` and `error_code`, explain to user in a friendly way
 - NEVER ignore errors or proceed as if operation succeeded
 
@@ -257,7 +289,25 @@ Examples:
 
 # Important Guidelines:
 - Always respond in Korean with a friendly tone
-- When showing campaign lists, number them for easy selection
+- When showing campaign lists, use numbered format WITHOUT bullet points or dashes:
+  ```
+  1. 캠페인 제목
+  카테고리: 재활용
+  지역: 지역 이름
+  기간: 2025.01.01 ~ 2025.12.31
+  주최: 주최 단체
+  장소: 캠페인 장소
+  자세히보기: 해당 캠페인 URL
+
+  2. 다음 캠페인 제목
+  카테고리: 자연보호
+  지역: 부산
+  기간: 2025.02.01 ~ 2025.03.01
+  주최: 주최 단체
+  장소: 캠페인 장소
+  자세히보기: 해당 캠페인 URL
+  ```
+  IMPORTANT: Do NOT use dashes (-) before each detail line. Write details directly without any bullet points.
 - Use ONLY the waste sorting information above; if not listed, be honest and suggest checking ☎ 120
 - NEVER fabricate or guess information
 
@@ -267,18 +317,23 @@ Examples:
 3. After participation: inform user missions are created, guide them to check in the app
 4. Note: Mission submissions (photos, quizzes) are done in app UI, not through chat
 
-# Example Response:
+# Character-Specific Greeting:
+When greeting users, use: "{character['greeting']}"
+
+# Example Responses (maintain your character's style):
+
+User: "안녕"
+You: {character['greeting']}
+
 User: "계란 껍질이 일반 쓰레기야?"
-You: "네, 맞아요! 계란 껍질은 일반쓰레기로 배출하시면 됩니다. 🗑️ 껍질이 딱딱해서 음식물 처리기에 무리를 주기 때문이에요."""
+You: [Answer using your character's speaking style] "**계란 껍질**은 **일반쓰레기**로 배출해야 합니다. 껍질이 딱딱해서 음식물 처리기에 무리를 주기 때문입니다."
 
-        # LangGraph의 create_react_agent 사용
-        agent_executor = create_react_agent(
-            model=self.llm,
-            tools=tools,
-            prompt=system_prompt
-        )
+# Important Reminder:
+- ALWAYS speak in your character's unique style and tone
+- Maintain consistency with your personality throughout the conversation
+"""
 
-        return agent_executor
+        return system_prompt
 
     def _get_session_history(self, session_id: str) -> InMemoryChatMessageHistory:
         """
@@ -297,14 +352,16 @@ You: "네, 맞아요! 계란 껍질은 일반쓰레기로 배출하시면 됩니
     async def chat(
         self,
         user_id: UUID,
-        message: str
+        message: str,
+        selected_character: str = "earth_zeroro"
     ) -> Dict[str, Any]:
         """
-        사용자와 AI 에이전트 대화 (서버 메모리에서 맥락 자동 관리)
+        사용자와 AI 에이전트 대화 (캐릭터별 개성, 서버 메모리에서 맥락 자동 관리)
 
         Args:
             user_id: 사용자 UUID
             message: 사용자 메시지
+            selected_character: 선택된 캐릭터 ID (기본값: earth_zeroro)
 
         Returns:
             응답 딕셔너리 (message)
@@ -322,11 +379,31 @@ You: "네, 맞아요! 계란 껍질은 일반쓰레기로 배출하시면 됩니
                 # 사용자 정보 조회 실패 시 기본값 사용
                 pass
 
+            # 캐릭터별 프롬프트 생성
+            character_prompt = self._get_character_prompt(selected_character)
+
+            # 캐릭터 프롬프트로 에이전트 생성
+            tools = self._get_tools()
+
+            agent_executor = create_react_agent(
+                model=self.llm,
+                tools=tools,
+                prompt=SystemMessage(content=character_prompt)
+            )
+
+            # 에이전트를 메모리 래퍼로 감싸기
+            agent_with_memory = RunnableWithMessageHistory(
+                agent_executor,
+                self._get_session_history,
+                input_messages_key="messages",
+                output_messages_key="messages",
+            )
+
             # 현재 메시지에 사용자 컨텍스트 추가
             input_message = f"[User ID: {user_id}]\n[User Region: {user_region}]\n{message}"
 
             # 메모리가 적용된 agent 실행
-            result = await self.agent_with_memory.ainvoke(
+            result = await agent_with_memory.ainvoke(
                 {"messages": [HumanMessage(content=input_message)]},
                 config={"configurable": {"session_id": session_id}}
             )
