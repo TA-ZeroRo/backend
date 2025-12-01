@@ -75,11 +75,11 @@ class ReportService:
         months_since_signup = (current_year - signup_year) * 12 + (current_month - signup_month) + 1
         max_months = limit if limit is not None else months_since_signup
 
-        # 이전 달부터 역순으로 조회
+        # 이전 달부터 역순으로 조회 (현재 진행 중인 월은 제외)
         for i in range(max_months):
-            # i개월 전 계산
+            # i개월 전 계산 (현재 달 -1부터 시작)
             target_year = current_year
-            target_month = current_month - i
+            target_month = current_month - 1 - i
 
             # 월이 0 이하로 내려가면 작년으로 이동
             while target_month <= 0:
