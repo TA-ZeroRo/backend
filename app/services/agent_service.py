@@ -13,6 +13,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 
 from app.core.config import get_gemini_api_key, get_tavily_api_key
 from app.config.characters import get_character_info
+from app.config.personalities import get_personality_info
 from app.services.campaign_service import CampaignService
 from app.services.campaign_agent_service import CampaignAgentService
 from app.services.user_service import UserService
@@ -179,12 +180,13 @@ Returns:
 
         return tools
 
-    def _get_character_prompt(self, character_id: str) -> str:
+    def _get_character_prompt(self, character_id: str, personality_id: str = "friendly") -> str:
         """
-        캐릭터 ID에 맞는 시스템 프롬프트 생성
+        캐릭터 ID와 성격 ID에 맞는 시스템 프롬프트 생성
 
         Args:
             character_id: 캐릭터 식별자 (zeroro, eco_warrior, nature_sage, tech_green)
+            personality_id: 성격 식별자 (friendly, playful, researcher, coach, elegant)
 
         Returns:
             캐릭터별 시스템 프롬프트 문자열
@@ -192,11 +194,17 @@ Returns:
         # 캐릭터 정보 가져오기
         character = get_character_info(character_id)
 
-        # 기본 프롬프트 템플릿 (캐릭터 성격을 주입)
+        # 성격 정보 가져오기
+        personality = get_personality_info(personality_id)
+
+        # 기본 프롬프트 템플릿 (캐릭터 성격 + 말투 스타일 주입)
         system_prompt = f"""You are {character['name']}, an AI assistant for environmental protection.
 
 # Your Identity and Personality:
 {character['personality']}
+
+# Your Speaking Style:
+{personality['prompt_style']}
 
 # Your Main Roles:
 
@@ -353,7 +361,8 @@ You: [Answer using your character's speaking style] "**계란 껍질**은 **일�
         self,
         user_id: UUID,
         message: str,
-        selected_character: str = "earth_zeroro"
+        selected_character: str = "earth_zeroro",
+        selected_personality: str = "friendly"
     ) -> Dict[str, Any]:
         """
         사용자와 AI 에이전트 대화 (캐릭터별 개성, 서버 메모리에서 맥락 자동 관리)
@@ -362,6 +371,7 @@ You: [Answer using your character's speaking style] "**계란 껍질**은 **일�
             user_id: 사용자 UUID
             message: 사용자 메시지
             selected_character: 선택된 캐릭터 ID (기본값: earth_zeroro)
+            selected_personality: 선택된 성격 ID (기본값: friendly)
 
         Returns:
             응답 딕셔너리 (message)
@@ -379,8 +389,8 @@ You: [Answer using your character's speaking style] "**계란 껍질**은 **일�
                 # 사용자 정보 조회 실패 시 기본값 사용
                 pass
 
-            # 캐릭터별 프롬프트 생성
-            character_prompt = self._get_character_prompt(selected_character)
+            # 캐릭터별 프롬프트 생성 (성격 포함)
+            character_prompt = self._get_character_prompt(selected_character, selected_personality)
 
             # 캐릭터 프롬프트로 에이전트 생성
             tools = self._get_tools()

@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from uuid import UUID
 from app.services.user_service import UserService
 from app.config.personalities import get_random_personality, PERSONALITY_TYPES
+from app.schemas.user_schemas import UserUpdate
 
 router = APIRouter()
 user_service = UserService()
@@ -70,15 +71,15 @@ async def gacha_personality(user_id: UUID):
     owned_personalities = user.get("personalities", [])
     is_new = personality_id not in owned_personalities
 
-    # 업데이트할 데이터 준비 (티켓은 항상 차감)
-    update_data = {"gacha_tickets": gacha_tickets - 1}
-
     # 새로운 성격이면 personalities 배열에 추가
     if is_new:
         owned_personalities.append(personality_id)
-        update_data["personalities"] = owned_personalities
 
     # DB 업데이트 (티켓 차감 + 성격 추가)
+    update_data = UserUpdate(
+        gacha_tickets=gacha_tickets - 1,
+        personalities=owned_personalities if is_new else None
+    )
     await user_service.update_user(user_id=user_id, user_data=update_data)
 
     return {
