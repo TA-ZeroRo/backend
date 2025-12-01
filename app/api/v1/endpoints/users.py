@@ -33,12 +33,3 @@ async def delete_user(user_id: UUID):
     사용자를 삭제합니다.
     """
     return await user_service.delete_user(user_id)
-
-@router.post("/{user_id}/personality/gacha")
-async def gacha_personality(user_id: UUID):
-    """
-    성격 뽑기를 진행합니다.
-    300포인트마다 1번 뽑을 수 있으며, 포인트는 차감되지 않습니다.
-    랜덤으로 성격을 뽑아서 반환합니다.
-    """
-    return await user_service.gacha_personality(user_id)
