@@ -58,11 +58,15 @@ def get_available_personalities() -> list:
 
 def get_random_personality() -> dict:
     """
-    랜덤 성격 반환 (중복 허용)
+    랜덤 성격 반환 (friendly 제외, 중복 허용)
+
+    friendly는 기본 성격이므로 뽑기에서 제외됩니다.
 
     Returns:
         랜덤으로 선택된 성격 정보 딕셔너리
     """
     import random
-    personality_id = random.choice(list(PERSONALITY_TYPES.keys()))
+    # friendly를 제외한 성격 목록
+    available_personalities = [k for k in PERSONALITY_TYPES.keys() if k != "friendly"]
+    personality_id = random.choice(available_personalities)
     return PERSONALITY_TYPES[personality_id]
