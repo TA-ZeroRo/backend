@@ -4,6 +4,7 @@ from typing import Dict, Any, List, Optional
 from uuid import UUID
 from datetime import date
 from app.repository.recruiting_chat_repository import RecruitingChatRepository
+from app.services.fcm_service import FcmService
 from app.schemas.recruiting_chat_schemas import (
     RecruitingPostCreate,
     RecruitingPostUpdate,
@@ -12,6 +13,7 @@ from app.schemas.recruiting_chat_schemas import (
     JoinRecruitingRequest,
     KickParticipantRequest
 )
+from app.schemas.fcm_schemas import ChatPushNotification
 
 
 class RecruitingChatService:
@@ -19,6 +21,7 @@ class RecruitingChatService:
 
     def __init__(self):
         self.recruiting_repo = RecruitingChatRepository()
+        self.fcm_service = FcmService()
 
     # ===== RecruitingPost 관련 메서드 =====
     async def get_recruiting_posts(
@@ -275,7 +278,69 @@ class RecruitingChatService:
         if not created_message:
             raise HTTPException(status_code=500, detail="메시지 전송에 실패했습니다.")
 
+        # 푸시 알림 발송 (비동기로 처리, 실패해도 메시지 전송은 성공)
+        try:
+            await self._send_chat_push_notification(
+                chat_room_id=message_data.chat_room_id,
+                sender_id=str(message_data.user_id),
+                message=message_data.message,
+                created_message=created_message
+            )
+        except Exception as e:
+            # 푸시 알림 실패는 로그만 남기고 메시지 전송은 성공 처리
+            print(f"Error sending push notification: {e}")
+
         return created_message
+
+    async def _send_chat_push_notification(
+        self,
+        chat_room_id: int,
+        sender_id: str,
+        message: str,
+        created_message: Dict[str, Any]
+    ) -> None:
+        """채팅 메시지 푸시 알림 발송 (내부 메서드)"""
+        # 채팅방 참여자 목록 조회
+        participants = await self.recruiting_repo.get_participants_by_room_id(chat_room_id)
+
+        # 발신자를 제외한 참여자 ID 목록
+        recipient_user_ids = [
+            p["user_id"] for p in participants
+            if p["user_id"] != sender_id
+        ]
+
+        if not recipient_user_ids:
+            return
+
+        # 발신자 정보 추출
+        sender_profile = created_message.get("profiles", {})
+        sender_name = sender_profile.get("username", "알 수 없는 사용자") if sender_profile else "알 수 없는 사용자"
+
+        # 채팅방의 리크루팅 게시글 정보 조회
+        chat_room = await self.recruiting_repo.get_chat_room_by_id(chat_room_id)
+        recruiting_post_id = chat_room.get("recruiting_post_id") if chat_room else None
+        recruiting_title = None
+
+        if recruiting_post_id:
+            post = await self.recruiting_repo.get_recruiting_post_by_id(recruiting_post_id)
+            if post:
+                recruiting_title = post.get("title")
+
+        # 푸시 알림 데이터 생성
+        notification_data = ChatPushNotification(
+            chat_room_id=chat_room_id,
+            sender_id=sender_id,
+            sender_name=sender_name,
+            message=message,
+            recruiting_post_id=recruiting_post_id,
+            recruiting_title=recruiting_title
+        )
+
+        # FCM 발송
+        await self.fcm_service.send_chat_notification(
+            notification_data=notification_data,
+            recipient_user_ids=recipient_user_ids
+        )
 
     async def get_chat_room_participants(self, room_id: int, user_id: str) -> List[Dict[str, Any]]:
         """채팅방 참여자 목록 조회 (권한 검증 포함)"""
