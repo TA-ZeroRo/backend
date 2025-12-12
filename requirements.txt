@@ -10,5 +10,5 @@ langchain-core
 langchain-community
 langgraph
 tavily-python
-sentence-transformers
 firebase-admin
+
