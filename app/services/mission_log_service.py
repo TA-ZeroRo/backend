@@ -122,17 +122,17 @@ class MissionLogService:
         proof_data: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         """
-        증빙 데이터 제출 및 상태 자동 변경
+        증빙 데이터 제출 및 상태 변경
 
-        증빙 데이터가 들어올 때 자동으로 상태를 판단합니다:
-        - 정상 데이터: IN_PROGRESS -> COMPLETED
-        - 오류 데이터: IN_PROGRESS -> FAILED
+        모든 정상 제출은 PENDING_VERIFICATION 상태로 변경됩니다.
+        Console에서 관리자가 최종 승인/반려를 결정합니다.
 
         Parameters:
         - log_id: 미션 로그 ID
         - proof_data: 증빙 데이터
+          - verification_result: AI 검증 결과 (is_valid, confidence, reason)
+          - imageUrl, text 등: 실제 증빙 데이터
           - 오류 판단 기준: error, error_message, failed 필드가 있으면 FAILED
-          - 그 외에는 COMPLETED로 처리
 
         Returns:
         - 업데이트된 미션 로그 정보
@@ -150,18 +150,17 @@ class MissionLogService:
             await self._update_log_or_raise(log_id, {"proof_data": proof_data})
             return await self.mission_log_repo.get_log_by_id(log_id)
 
-        # 상태 결정 및 업데이트
+        # 상태 결정: 오류가 아니면 PENDING_VERIFICATION (Console 확인 필요)
+        # 포인트 지급은 Console에서 승인 시에만 수행
+        new_status = "FAILED" if has_error else "PENDING_VERIFICATION"
+
         update_data = {
-            "status": "FAILED" if has_error else "COMPLETED",
+            "status": new_status,
             "proof_data": proof_data,
-            "completed_at": None if has_error else datetime.now(timezone.utc).isoformat()
         }
         await self._update_log_or_raise(log_id, update_data)
 
-        # COMPLETED 상태로 변경된 경우 포인트 지급
-        if not has_error and current_status != "COMPLETED":
-            await self._award_points_for_completion(current_log)
-
+        # PENDING_VERIFICATION은 포인트 지급 안 함 (Console 승인 시에만 지급)
         return await self.mission_log_repo.get_log_by_id(log_id)
 
     async def update_mission_log_status(
