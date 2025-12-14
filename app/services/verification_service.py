@@ -91,11 +91,11 @@ def _validate_category_pair(main_category_id: int, sub_category_id: int) -> tupl
         (is_valid, error_message): 유효하면 (True, None), 무효하면 (False, 에러 메시지)
     """
     main_category = _get_main_category(main_category_id)
-    if not main_category:
+    if main_category is None:  # IntEnum(0)은 falsy하므로 is None 체크 필요
         return False, f"Invalid main category index: {main_category_id}"
 
     sub_category = _get_sub_category(sub_category_id)
-    if not sub_category:
+    if sub_category is None:
         return False, f"Invalid sub category index: {sub_category_id}"
 
     if sub_category.main_category_id != main_category_id:
@@ -125,6 +125,17 @@ quiz_ox_response_schema = types.Schema(
     required=["question", "answer", "explanation"],
 )
 
+# 텍스트 리뷰 검증 스키마
+text_review_verification_schema = types.Schema(
+    type="object",
+    properties={
+        "is_valid": types.Schema(type="boolean", description="Is the text review relevant to the mission topic?"),
+        "confidence": types.Schema(type="number", description="Confidence level (0-1) of the verification"),
+        "reason": types.Schema(type="string", description="Reason for the verification result in Korean"),
+    },
+    required=["is_valid", "confidence", "reason"],
+)
+
 
 class VerificationService:
     """인증(이미지, 퀴즈, 소감문) 관련 비즈니스 로직을 처리하는 서비스"""
@@ -139,7 +150,7 @@ class VerificationService:
         image_bytes: bytes,
         main_category_index: int,
         sub_category_index: int
-    ) -> str:
+    ) -> Dict[str, Any]:
         """카테고리별 이미지 검증"""
         # 카테고리 유효성 및 관계 검증
         is_valid, error_message = _validate_category_pair(main_category_index, sub_category_index)
@@ -196,7 +207,7 @@ class VerificationService:
                     system_instruction=system_prompt
                 ),
             )
-            return response.text
+            return json.loads(response.text)
 
         except Exception as e:
             raise Exception(f"이미지 검증 중 오류가 발생했습니다: {str(e)}")
@@ -239,29 +250,66 @@ class VerificationService:
         except Exception as e:
             raise Exception(f"퀴즈 생성 중 오류가 발생했습니다: {str(e)}")
 
-    async def verify_article_summary(
+    async def verify_text_review(
         self,
-        summary: str,
-        concepts: list[str],
-        threshold: float = 0.5
-    ) -> bool:
-        """소감문 검증 (의미적 유사도 기반)"""
-        if not summary or not concepts:
-            return False
+        text: str,
+        mission_title: str,
+        mission_description: str
+    ) -> Dict[str, Any]:
+        """
+        텍스트 리뷰가 미션 주제와 관련있는지 검증
 
-        # 모델 초기화 (lazy loading)
-        if self.similarity_model is None:
-            self.similarity_model = SentenceTransformer('jhgan/ko-sroberta-multitask')
+        Parameters:
+        - text: 사용자가 작성한 텍스트
+        - mission_title: 미션 제목
+        - mission_description: 미션 설명
 
-        summary_embedding = self.similarity_model.encode(summary, convert_to_tensor=True)
-        concept_embeddings = self.similarity_model.encode(concepts, convert_to_tensor=True)
+        Returns:
+        - {is_valid, confidence, reason}
+        """
+        system_prompt = f"""
+        You are an AI content reviewer for "zeroro", an environmental protection app.
+        Your task is to verify if a user's text review is genuinely related to the given mission topic.
 
-        cosine_scores = util.cos_sim(summary_embedding, concept_embeddings)
-        max_score = cosine_scores.max().item()
+        **Mission Information:**
+        - **Title:** "{mission_title}"
+        - **Description:** "{mission_description}"
 
-        print(f"DEBUG: Max similarity score is {max_score}")
+        **Your Objective:**
+        Determine if the user's text is meaningfully related to the mission topic.
 
-        return max_score > threshold
+        **Evaluation Criteria:**
+        1. **Topic Relevance:** Does the text discuss the mission topic (e.g., recycling, using reusable items, saving energy)?
+        2. **Authenticity:** Does it appear to be a genuine personal experience or reflection, not random text or copy-paste?
+        3. **Minimum Effort:** Is there some meaningful content (not just filler words or repetitive characters)?
+
+        **Judgement Guidelines:**
+        - **Valid (is_valid: true):** The text shows genuine effort to discuss the mission topic, even if brief.
+        - **Invalid (is_valid: false):** The text is completely unrelated, meaningless, or clearly spam/random characters.
+
+        Be lenient - if the user made a genuine attempt to write about the topic, accept it.
+
+        Provide your response ONLY in the specified JSON schema format.
+        The 'reason' must be a concise explanation in **Korean**.
+        """
+
+        try:
+            api_key = get_gemini_api_key()
+            client = genai.Client(api_key=api_key)
+
+            response = client.models.generate_content(
+                model="gemini-2.5-pro",
+                contents=f"Please verify this text review:\n\n{text}",
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=text_review_verification_schema,
+                    system_instruction=system_prompt
+                ),
+            )
+            return json.loads(response.text)
+        except Exception as e:
+            raise Exception(f"텍스트 검증 중 오류가 발생했습니다: {str(e)}")
+
 
     @staticmethod
     def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

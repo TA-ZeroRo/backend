@@ -47,6 +47,7 @@ class RecruitingPostResponse(RecruitingPostBase):
     created_at: datetime
     updated_at: datetime
     profiles: Optional[Dict[str, Any]] = None  # user_img, username 포함
+    campaigns: Optional[Dict[str, Any]] = None  # title, image_url 포함
     chat_room_id: Optional[int] = None  # 채팅방 ID (있는 경우)
     is_participating: bool = False  # 현재 사용자 참여 여부
 
@@ -128,3 +129,10 @@ class ChatMessageResponse(ChatMessageBase):
 class JoinRecruitingRequest(BaseModel):
     """리크루팅 참여 요청 스키마"""
     user_id: UUID
+
+
+# ===== Kick 스키마 =====
+class KickParticipantRequest(BaseModel):
+    """참여자 강퇴 요청 스키마"""
+    host_user_id: UUID  # 주최자 ID (권한 검증용)
+    target_user_id: UUID  # 강퇴 대상 ID
