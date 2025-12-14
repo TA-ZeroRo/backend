@@ -207,3 +207,33 @@ class MissionLogRepository(BaseRepository):
 
         response = query.order("started_at", desc=True).execute()
         return response.data if response.data else []
+
+    async def delete_by_user_and_campaign(
+        self,
+        user_id: UUID,
+        campaign_id: int
+    ) -> int:
+        """
+        특정 사용자의 특정 캠페인에 속한 모든 미션 로그 삭제
+
+        Parameters:
+        - user_id: 사용자 UUID
+        - campaign_id: 캠페인 ID
+
+        Returns:
+        - 삭제된 로그 개수
+        """
+        # 먼저 해당 캠페인의 미션 로그들을 조회
+        logs = await self.get_by_campaign_id(campaign_id, user_id)
+
+        if not logs:
+            return 0
+
+        # 각 로그를 삭제
+        deleted_count = 0
+        for log in logs:
+            success = await self.delete_log(log['id'])
+            if success:
+                deleted_count += 1
+
+        return deleted_count

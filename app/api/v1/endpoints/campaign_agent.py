@@ -52,6 +52,28 @@ async def get_campaign_progress(campaign_id: int, user_id: UUID = Query(...)):
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/campaigns/{campaign_id}", status_code=200)
+async def cancel_campaign(campaign_id: int, user_id: UUID = Body(..., embed=True)):
+    """
+    사용자의 캠페인 참가를 취소하고 모든 미션 로그를 삭제합니다.
+
+    Parameters:
+    - campaign_id (int): 캠페인 ID
+    - user_id (UUID): 사용자 ID (요청 본문)
+
+    Returns:
+    - success: 성공 여부
+    - deleted_count: 삭제된 미션 로그 개수
+    - message: 결과 메시지
+    """
+    try:
+        return await campaign_agent_service.cancel_campaign(user_id, campaign_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 # -----------------------
 # --- END: 캠페인 진행 API ---
 # -----------------------
