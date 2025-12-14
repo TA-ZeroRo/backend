@@ -13,6 +13,14 @@ class LocationVerificationRequest(BaseModel):
     latitude: float
     longitude: float
 
+
+# ===== 텍스트 리뷰 검증 요청 스키마 =====
+class TextVerificationRequest(BaseModel):
+    """텍스트 리뷰 검증 요청"""
+    text: str
+    mission_title: str
+    mission_description: str
+
 # @router.post("/image")
 # async def verify_image(image_data: dict):
 #     """
@@ -93,7 +101,42 @@ async def create_quiz():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-        
+
+@router.post("/text")
+async def verify_text(request: TextVerificationRequest):
+    """
+    텍스트 리뷰가 미션 주제와 관련있는지 검증합니다.
+
+    Request Body:
+    - text: 사용자가 작성한 텍스트 (최소 50자)
+    - mission_title: 미션 제목
+    - mission_description: 미션 설명
+
+    Response:
+    - is_valid: 검증 성공 여부
+    - confidence: 신뢰도 (0-1)
+    - reason: 검증 결과 메시지 (한글)
+    """
+    try:
+        # 텍스트 길이 검증
+        if len(request.text) < 50:
+            raise HTTPException(
+                status_code=400,
+                detail="텍스트는 최소 50자 이상이어야 합니다."
+            )
+
+        result = await verification_service.verify_text_review(
+            text=request.text,
+            mission_title=request.mission_title,
+            mission_description=request.mission_description
+        )
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # 기사 인증 API -> 추후 추가 예정
 # @router.post("/summary")
 # async def verify_article_summary(article_id: int, user_summary: str):
