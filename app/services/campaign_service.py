@@ -16,7 +16,7 @@ class CampaignService:
         status: Optional[str] = None,
         offset: int = 0,
         limit: int = 20
-    ) -> Dict[str, List[Dict[str, Any]]]:
+    ) -> Dict[str, Any]:
         """
         캠페인 목록 조회
 
@@ -28,7 +28,7 @@ class CampaignService:
         - limit: 페이지당 조회 개수 (기본: 20)
 
         Returns:
-        - {"campaigns": [...]}
+        - {"campaigns": [...], "total": N}
         """
         campaigns = await self.campaign_repo.get_all_campaigns(
             region=region,
@@ -38,4 +38,22 @@ class CampaignService:
             limit=limit
         )
 
-        return {"campaigns": campaigns}
+        return {
+            "campaigns": campaigns,
+            "total": len(campaigns)
+        }
+
+    async def get_campaign_by_id(
+        self,
+        campaign_id: int
+    ) -> Optional[Dict[str, Any]]:
+        """
+        캠페인 ID로 단일 캠페인 조회
+
+        Parameters:
+        - campaign_id: 캠페인 ID
+
+        Returns:
+        - 캠페인 정보 (campaign_source 포함) 또는 None
+        """
+        return await self.campaign_repo.get_campaign_by_id(campaign_id)
