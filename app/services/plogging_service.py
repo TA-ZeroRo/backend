@@ -1,8 +1,9 @@
 """Plogging Service - 플로깅 비즈니스 로직"""
 from typing import Dict, Any, List, Optional
 from uuid import UUID
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from math import radians, cos, sin, asin, sqrt
+import re
 
 from app.repository.plogging_repository import PloggingRepository
 from app.repository.user_repository import UserRepository
@@ -85,9 +86,9 @@ class PloggingService:
         if session["status"] != PloggingStatus.IN_PROGRESS.value:
             raise ValueError("진행 중인 세션만 종료할 수 있습니다.")
 
-        # 시간 계산
-        started_at = datetime.fromisoformat(session["started_at"].replace("Z", "+00:00"))
-        ended_at = datetime.now(started_at.tzinfo) if started_at.tzinfo else datetime.now()
+        # 시간 계산 (Supabase 타임스탬프 포맷 호환)
+        started_at = self._parse_timestamp(session["started_at"])
+        ended_at = datetime.now(timezone.utc)
         duration = ended_at - started_at
         duration_minutes = int(duration.total_seconds() / 60)
 
@@ -347,6 +348,18 @@ class PloggingService:
         c = 2 * asin(sqrt(a))
         r = 6371000  # 지구 반경 (미터)
         return c * r
+
+    @staticmethod
+    def _parse_timestamp(ts: str) -> datetime:
+        """Supabase 타임스탬프 파싱 (마이크로초 자릿수 정규화)"""
+        # 마이크로초 부분을 6자리로 정규화
+        # 예: '2025-12-14T09:34:57.78631+00:00' -> '2025-12-14T09:34:57.786310+00:00'
+        match = re.match(r'(.+\.)(\d+)(\+.+)', ts)
+        if match:
+            prefix, microsec, suffix = match.groups()
+            microsec = microsec.ljust(6, '0')[:6]  # 6자리로 맞춤
+            ts = f"{prefix}{microsec}{suffix}"
+        return datetime.fromisoformat(ts.replace("Z", "+00:00"))
 
     async def _add_user_points(self, user_id: UUID, points: int) -> None:
         """사용자 포인트 추가"""

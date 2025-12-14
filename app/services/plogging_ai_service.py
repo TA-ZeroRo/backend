@@ -102,7 +102,7 @@ class PloggingAIService:
             client = genai.Client(api_key=self.api_key)
 
             response = client.models.generate_content(
-                model="gemini-2.5-flash-preview-05-20",
+                model="gemini-2.0-flash",
                 contents=[
                     types.Part.from_bytes(
                         data=image_bytes,
@@ -152,7 +152,7 @@ class PloggingAIService:
             client = genai.Client(api_key=self.api_key)
 
             response = client.models.generate_content(
-                model="gemini-2.5-flash-preview-05-20",
+                model="gemini-2.0-flash",
                 contents=[
                     types.Part.from_bytes(
                         data=image_bytes,
