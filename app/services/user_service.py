@@ -35,6 +35,10 @@ class UserService:
         if "last_active_at" in user_dict and user_dict["last_active_at"]:
             user_dict["last_active_at"] = user_dict["last_active_at"].isoformat()
 
+        # 기본 캐릭터 자동 추가 (earth_zeroro)
+        if "characters" not in user_dict or not user_dict["characters"]:
+            user_dict["characters"] = ["earth_zeroro"]
+
         created_user = await self.user_repo.create_user(user_dict)
         if not created_user:
             raise HTTPException(status_code=500, detail="유저 생성에 실패했습니다.")

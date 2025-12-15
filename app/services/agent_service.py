@@ -341,15 +341,19 @@ Returns:
 
 **User Region Context:**
 - User Region: [User Region: ...] in every message (format: "도 시/구" e.g., "서울특별시 성북구", "경기도 고양시")
-- IMPORTANT: Extract the appropriate region level based on user intent:
-  - "우리 지역", "내 지역" → use CITY/DISTRICT level (e.g., "성북구", "고양시")
-  - "서울", "부산", "경기" → use PROVINCE level (e.g., "서울", "경기")
-  - Specific city/district mentioned → use that specific location (e.g., "강남구" → "강남")
+- **CRITICAL: Only filter by region when explicitly mentioned!**
+  - "캠페인 뭐있어?", "인앱 캠페인 보여줘" → **NO region filter** (search with region=None for all campaigns)
+  - "우리 지역 캠페인", "내 지역 캠페인" → use user's CITY/DISTRICT level (e.g., "성북구", "고양시")
+  - "서울 캠페인", "부산 캠페인" → use mentioned PROVINCE (e.g., "서울", "부산")
+  - Specific city/district mentioned → use that specific location (e.g., "강남구 캠페인" → "강남")
 - Categories: 재활용, 대중교통, 에너지절약, 제로웨이스트, 자연보호, 교육, 기타
 
 **Region Extraction Examples:**
 - User Region: "서울특별시 성북구"
+  - "캠페인 뭐있어?" → search with region=None (전체 캠페인)
+  - "인앱 캠페인 보여줘" → search with region=None (전체 캠페인)
   - "우리 지역 캠페인" → search with region="성북" or "성북구"
+  - "내 지역 캠페인" → search with region="성북" or "성북구"
   - "서울 캠페인" → search with region="서울"
   - "강남구 캠페인" → search with region="강남"
 
