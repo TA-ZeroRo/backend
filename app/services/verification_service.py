@@ -409,7 +409,7 @@ class VerificationService:
         if distance > location_radius:
             return {
                 "is_valid": False,
-                "reason": f"캠페인 장소에서 {int(distance)}m 떨어져 있습니다 (허용: {location_radius}m)",
+                "reason": "캠페인 장소에서 너무 떨어져 있습니다",
                 "distance": distance
             }
 
