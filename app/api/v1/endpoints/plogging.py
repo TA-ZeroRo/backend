@@ -44,12 +44,16 @@ async def start_plogging_session(request: PloggingSessionCreate):
 
     Parameters:
     - user_id: 사용자 UUID
+    - initial_photo_url: 초기 사진 URL (본인 + 쓰레기 담을 용기)
 
     Returns:
     - 생성된 세션 정보
     """
     try:
-        session = await plogging_service.start_session(request.user_id)
+        session = await plogging_service.start_session(
+            user_id=request.user_id,
+            initial_photo_url=request.initial_photo_url
+        )
         return session
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

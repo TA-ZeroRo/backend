@@ -15,9 +15,12 @@ class PloggingRepository(BaseRepository):
     H3_TABLE = "plogging_h3_aggregations"
 
     # ===== 세션 관련 =====
-    async def create_session(self, user_id: UUID) -> Optional[Dict[str, Any]]:
+    async def create_session(self, user_id: UUID, initial_photo_url: str) -> Optional[Dict[str, Any]]:
         """플로깅 세션 생성"""
-        data = {"user_id": str(user_id)}
+        data = {
+            "user_id": str(user_id),
+            "initial_photo_url": initial_photo_url
+        }
         return await self.create(self.SESSIONS_TABLE, data)
 
     async def get_session_by_id(self, session_id: int) -> Optional[Dict[str, Any]]:

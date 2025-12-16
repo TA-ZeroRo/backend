@@ -33,6 +33,7 @@ class GpsPoint(BaseModel):
 class PloggingSessionCreate(BaseModel):
     """플로깅 세션 시작 요청"""
     user_id: UUID
+    initial_photo_url: str  # 초기 사진 URL (필수)
 
 
 class PloggingSessionEnd(BaseModel):
@@ -53,6 +54,7 @@ class PloggingSessionResponse(BaseModel):
     verification_count: int = 0
     points_earned: int = 0
     created_at: datetime
+    initial_photo_url: Optional[str] = None  # 초기 사진 URL
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -92,6 +94,14 @@ class AIVerificationResult(BaseModel):
     confidence: float = Field(..., ge=0.0, le=1.0)
     detected_items: List[str] = []
     reason: str
+
+
+class AIComparisonResult(BaseModel):
+    """AI 사진 비교 검증 결과 (초기 사진 vs 현재 사진)"""
+    is_same_person: bool  # 동일 인물 여부
+    trash_increased: bool  # 쓰레기 양 증가 여부
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    reason: str  # 검증 결과 설명 (한국어)
 
 
 # ===== 경로 스키마 =====

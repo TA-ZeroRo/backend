@@ -41,12 +41,13 @@ class PloggingService:
         self.ai_service = PloggingAIService()
 
     # ===== 세션 관리 =====
-    async def start_session(self, user_id: UUID) -> Dict[str, Any]:
+    async def start_session(self, user_id: UUID, initial_photo_url: str) -> Dict[str, Any]:
         """
         플로깅 세션 시작
 
         Parameters:
         - user_id: 사용자 UUID
+        - initial_photo_url: 초기 사진 URL (본인 + 쓰레기 담을 용기)
 
         Returns:
         - 생성된 세션 정보
@@ -56,8 +57,8 @@ class PloggingService:
         if active_session:
             raise ValueError("이미 진행 중인 플로깅 세션이 있습니다.")
 
-        # 새 세션 생성
-        session = await self.plogging_repo.create_session(user_id)
+        # 새 세션 생성 (초기 사진 URL 포함)
+        session = await self.plogging_repo.create_session(user_id, initial_photo_url)
         if not session:
             raise Exception("세션 생성에 실패했습니다.")
 
@@ -169,7 +170,7 @@ class PloggingService:
         longitude: float
     ) -> Dict[str, Any]:
         """
-        플로깅 사진 AI 검증
+        플로깅 사진 AI 검증 (초기 사진과 비교)
 
         Parameters:
         - session_id: 세션 ID
@@ -189,6 +190,11 @@ class PloggingService:
         if session["status"] != PloggingStatus.IN_PROGRESS.value:
             raise ValueError("진행 중인 세션에서만 인증할 수 있습니다.")
 
+        # 초기 사진 URL 가져오기
+        initial_photo_url = session.get("initial_photo_url")
+        if not initial_photo_url:
+            raise ValueError("초기 사진이 없습니다. 세션을 다시 시작해주세요.")
+
         # 인증 기록 생성 (PENDING 상태)
         verification = await self.plogging_repo.create_verification(
             session_id=session_id,
@@ -198,9 +204,12 @@ class PloggingService:
             image_url=image_url
         )
 
-        # AI 검증 수행
-        ai_result = await self.ai_service.verify_plogging_image(image_url)
-        is_passed = self.ai_service.is_verification_passed(ai_result)
+        # AI 비교 검증 수행 (초기 사진 vs 현재 사진)
+        comparison_result = await self.ai_service.compare_plogging_images(
+            initial_image_url=initial_photo_url,
+            current_image_url=image_url
+        )
+        is_passed = self.ai_service.is_comparison_passed(comparison_result)
 
         # 인증 결과 업데이트
         verification_status = VerificationStatus.VERIFIED if is_passed else VerificationStatus.REJECTED
@@ -208,12 +217,13 @@ class PloggingService:
 
         update_data = {
             "verification_status": verification_status.value,
-            "ai_confidence": ai_result.confidence,
+            "ai_confidence": comparison_result.confidence,
             "ai_result": {
-                "is_valid": ai_result.is_valid,
-                "confidence": ai_result.confidence,
-                "detected_items": ai_result.detected_items,
-                "reason": ai_result.reason
+                "is_valid": is_passed,
+                "is_same_person": comparison_result.is_same_person,
+                "trash_increased": comparison_result.trash_increased,
+                "confidence": comparison_result.confidence,
+                "reason": comparison_result.reason
             }
         }
         updated_verification = await self.plogging_repo.update_verification(
@@ -231,7 +241,13 @@ class PloggingService:
         return {
             **updated_verification,
             "points_earned": points_earned,
-            "ai_result": ai_result.model_dump()
+            "ai_result": {
+                "is_valid": is_passed,
+                "is_same_person": comparison_result.is_same_person,
+                "trash_increased": comparison_result.trash_increased,
+                "confidence": comparison_result.confidence,
+                "reason": comparison_result.reason
+            }
         }
 
     # ===== 지도 데이터 =====
