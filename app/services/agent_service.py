@@ -406,29 +406,26 @@ You: [즉시 search_campaigns tool 호출] → [결과 바로 표시]
 
 ```
 1. 캠페인 제목 [내부 캠페인]
+- 카테고리: 재활용
 
-  카테고리: 재활용
+- 지역: 서울
 
-  지역: 서울
+- 기간: 2025.01.01 ~ 2025.12.31
 
-  기간: 2025.01.01 ~ 2025.12.31
+- 주최: 환경부
 
-  주최: 환경부
-
-  자세히보기: https://...
-
-  앱에서 바로 참여할 수 있어요!
+- 자세히보기: https://...
 
 
 2. 다음 캠페인 [외부 캠페인]
 
-  카테고리: 자연보호
+- 카테고리: 자연보호
 
-  지역: 부산
+- 지역: 부산
 
-  자세히보기: https://...
+- 자세히보기: https://...
 
-  외부 사이트 캠페인이에요. 링크를 확인하고 직접 참여해주세요!
+외부 사이트 캠페인이에요. 링크를 확인하고 직접 참여해주세요!
 ```
 
 **잘못된 형식 (절대 이렇게 하지 마세요!):**
@@ -530,42 +527,39 @@ Friendly 톤:
 
 1. 제로로 분리수거 챌린지 [내부 캠페인]
 
-  카테고리: 재활용
+- 카테고리: 재활용
 
-  지역: 서울
+- 지역: 서울
   
-  앱에서 바로 참여할 수 있어요!
 2. 서울시 에코마일리지 [외부 캠페인]
   
-  카테고리: 재활용
+- 카테고리: 재활용
   
-  지역: 서울
+- 지역: 서울
   
-  자세히보기: https://...
+- 자세히보기: https://...
   
-  외부 사이트 캠페인이에요. 링크를 확인하고 직접 참여해주세요!
+외부 사이트 캠페인이에요. 링크를 확인하고 직접 참여해주세요!
 
 Playful 톤:
 오! 서울에 재활용 캠페인 찾았다! 완전 좋은데?!
 
 1. 제로로 분리수거 챌린지 [내부 캠페인]
   
-  카테고리: 재활용
+- 카테고리: 재활용
   
-  지역: 서울
-  
-  우리 앱에서 바로 참여 가능! 같이 해보자!
+- 지역: 서울
 
 
 2. 서울시 에코마일리지 [외부 캠페인]
   
-  카테고리: 재활용
+- 카테고리: 재활용
   
-  지역: 서울
+- 지역: 서울
   
-  자세히보기: https://...
+- 자세히보기: https://...
   
-  이건 외부 사이트야! 링크 타고 직접 가봐야 돼!
+이건 외부 사이트야! 링크 타고 직접 가봐야 돼!
 
 **Example 6 - Waste Sorting:**
 User: "피자박스는 재활용 되나요?"
@@ -688,6 +682,12 @@ You: "**피자박스**는 두 가지로 나눠야 해요! **기름 묻은 부분
                 config={"configurable": {"session_id": session_id}}
             )
 
+            # 디버깅: 전체 응답 로그
+            print(f"🔍 Debug - Agent result messages count: {len(result.get('messages', []))}")
+            if result.get("messages"):
+                for i, msg in enumerate(result["messages"]):
+                    print(f"  Message {i}: type={type(msg).__name__}, content_type={type(msg.content).__name__}, content_length={len(str(msg.content))}")
+
             # 마지막 메시지에서 응답 추출
             if result.get("messages"):
                 last_message = result["messages"][-1]
@@ -707,6 +707,11 @@ You: "**피자박스**는 두 가지로 나눠야 해요! **기름 묻은 부분
                 else:
                     # 기타 타입은 문자열로 변환
                     response_message = str(last_message.content)
+
+                # 빈 응답 처리
+                if not response_message or response_message.strip() == "":
+                    print(f"⚠️ Warning: Empty response from agent. Result: {result}")
+                    response_message = "죄송해요, 응답을 생성하지 못했어요. 다시 한 번 시도해주시겠어요?"
             else:
                 response_message = "응답을 생성할 수 없었습니다."
 
