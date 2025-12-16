@@ -85,12 +85,13 @@ class PloggingRepository(BaseRepository):
         max_lng: float,
         limit: int = 100
     ) -> List[Dict[str, Any]]:
-        """특정 영역 내 완료된 세션 목록 조회 (경로 포함)"""
+        """특정 영역 내 완료된 세션 목록 조회 (경로 포함, 인증 성공한 세션만)"""
         response = (
             self.supabase
             .table(self.SESSIONS_TABLE)
             .select("*, plogging_routes(*)")
             .eq("status", "COMPLETED")
+            .gt("verification_count", 0)  # 인증 성공한 세션만
             .order("created_at", desc=True)
             .limit(limit)
             .execute()
