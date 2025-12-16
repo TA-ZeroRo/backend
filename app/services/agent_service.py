@@ -341,15 +341,19 @@ Returns:
 
 **User Region Context:**
 - User Region: [User Region: ...] in every message (format: "도 시/구" e.g., "서울특별시 성북구", "경기도 고양시")
-- IMPORTANT: Extract the appropriate region level based on user intent:
-  - "우리 지역", "내 지역" → use CITY/DISTRICT level (e.g., "성북구", "고양시")
-  - "서울", "부산", "경기" → use PROVINCE level (e.g., "서울", "경기")
-  - Specific city/district mentioned → use that specific location (e.g., "강남구" → "강남")
+- **CRITICAL: Only filter by region when explicitly mentioned!**
+  - "캠페인 뭐있어?", "인앱 캠페인 보여줘" → **NO region filter** (search with region=None for all campaigns)
+  - "우리 지역 캠페인", "내 지역 캠페인" → use user's CITY/DISTRICT level (e.g., "성북구", "고양시")
+  - "서울 캠페인", "부산 캠페인" → use mentioned PROVINCE (e.g., "서울", "부산")
+  - Specific city/district mentioned → use that specific location (e.g., "강남구 캠페인" → "강남")
 - Categories: 재활용, 대중교통, 에너지절약, 제로웨이스트, 자연보호, 교육, 기타
 
 **Region Extraction Examples:**
 - User Region: "서울특별시 성북구"
+  - "캠페인 뭐있어?" → search with region=None (전체 캠페인)
+  - "인앱 캠페인 보여줘" → search with region=None (전체 캠페인)
   - "우리 지역 캠페인" → search with region="성북" or "성북구"
+  - "내 지역 캠페인" → search with region="성북" or "성북구"
   - "서울 캠페인" → search with region="서울"
   - "강남구 캠페인" → search with region="강남"
 
@@ -399,32 +403,36 @@ You: [즉시 search_campaigns tool 호출] → [결과 바로 표시]
 2. 각 정보(카테고리, 지역, 기간 등)는 반드시 별도의 줄에 작성
 3. 캠페인과 캠페인 사이에는 빈 줄 하나 추가
 4. 절대로 "카테고리: 재활용 지역: 서울" 이렇게 한 줄로 쓰지 마세요!
+5. **내부 캠페인은 링크 표시 안 함** (앱에서 바로 참여 가능)
+6. **외부 캠페인만 링크 표시** (외부 사이트 방문 필요)
 
+**내부 캠페인 (campaign_source: ZERORO) 형식:**
 ```
 1. 캠페인 제목 [내부 캠페인]
+- 카테고리: 재활용
 
-  카테고리: 재활용
+- 지역: 서울
 
-  지역: 서울
+- 기간: 2025.01.01 ~ 2025.12.31
 
-  기간: 2025.01.01 ~ 2025.12.31
+- 주최: 환경부
 
-  주최: 환경부
-
-  자세히보기: https://...
-
-  앱에서 바로 참여할 수 있어요!
+   앱에서 바로 참여할 수 있어요!
 
 
+```
+
+**외부 캠페인 (campaign_source: EXTERNAL) 형식:**
+```
 2. 다음 캠페인 [외부 캠페인]
 
-  카테고리: 자연보호
+- 카테고리: 자연보호
 
-  지역: 부산
+- 지역: 부산
 
-  자세히보기: https://...
+- 자세히보기: https://...
 
-  외부 사이트 캠페인이에요. 링크를 확인하고 직접 참여해주세요!
+외부 사이트 캠페인이에요. 링크를 확인하고 직접 참여해주세요!
 ```
 
 **잘못된 형식 (절대 이렇게 하지 마세요!):**
@@ -526,42 +534,44 @@ Friendly 톤:
 
 1. 제로로 분리수거 챌린지 [내부 캠페인]
 
-  카테고리: 재활용
+- 카테고리: 재활용
 
-  지역: 서울
-  
-  앱에서 바로 참여할 수 있어요!
+- 지역: 서울
+
+앱에서 바로 참여할 수 있어요!
+
+
 2. 서울시 에코마일리지 [외부 캠페인]
-  
-  카테고리: 재활용
-  
-  지역: 서울
-  
-  자세히보기: https://...
-  
-  외부 사이트 캠페인이에요. 링크를 확인하고 직접 참여해주세요!
+
+- 카테고리: 재활용
+
+- 지역: 서울
+
+- 자세히보기: https://...
+
+외부 사이트 캠페인이에요. 링크를 확인하고 직접 참여해주세요!
 
 Playful 톤:
 오! 서울에 재활용 캠페인 찾았다! 완전 좋은데?!
 
 1. 제로로 분리수거 챌린지 [내부 캠페인]
-  
-  카테고리: 재활용
-  
-  지역: 서울
-  
-  우리 앱에서 바로 참여 가능! 같이 해보자!
+
+- 카테고리: 재활용
+
+- 지역: 서울
+
+우리 앱에서 바로 참여 가능! 같이 해보자!
 
 
 2. 서울시 에코마일리지 [외부 캠페인]
-  
-  카테고리: 재활용
-  
-  지역: 서울
-  
-  자세히보기: https://...
-  
-  이건 외부 사이트야! 링크 타고 직접 가봐야 돼!
+
+- 카테고리: 재활용
+
+- 지역: 서울
+
+- 자세히보기: https://...
+
+이건 외부 사이트야! 링크 타고 직접 가봐야 돼!
 
 **Example 6 - Waste Sorting:**
 User: "피자박스는 재활용 되나요?"
@@ -684,6 +694,12 @@ You: "**피자박스**는 두 가지로 나눠야 해요! **기름 묻은 부분
                 config={"configurable": {"session_id": session_id}}
             )
 
+            # 디버깅: 전체 응답 로그
+            print(f"🔍 Debug - Agent result messages count: {len(result.get('messages', []))}")
+            if result.get("messages"):
+                for i, msg in enumerate(result["messages"]):
+                    print(f"  Message {i}: type={type(msg).__name__}, content_type={type(msg.content).__name__}, content_length={len(str(msg.content))}")
+
             # 마지막 메시지에서 응답 추출
             if result.get("messages"):
                 last_message = result["messages"][-1]
@@ -703,6 +719,11 @@ You: "**피자박스**는 두 가지로 나눠야 해요! **기름 묻은 부분
                 else:
                     # 기타 타입은 문자열로 변환
                     response_message = str(last_message.content)
+
+                # 빈 응답 처리
+                if not response_message or response_message.strip() == "":
+                    print(f"⚠️ Warning: Empty response from agent. Result: {result}")
+                    response_message = "죄송해요, 응답을 생성하지 못했어요. 다시 한 번 시도해주시겠어요?"
             else:
                 response_message = "응답을 생성할 수 없었습니다."
 
