@@ -136,3 +136,9 @@ class KickParticipantRequest(BaseModel):
     """참여자 강퇴 요청 스키마"""
     host_user_id: UUID  # 주최자 ID (권한 검증용)
     target_user_id: UUID  # 강퇴 대상 ID
+
+
+# ===== Leave 스키마 =====
+class LeaveRecruitingRequest(BaseModel):
+    """리크루팅 나가기 요청 스키마"""
+    user_id: UUID  # 나가려는 사용자 ID

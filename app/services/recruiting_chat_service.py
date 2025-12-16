@@ -11,7 +11,8 @@ from app.schemas.recruiting_chat_schemas import (
     RecruitingPostDelete,
     ChatMessageCreate,
     JoinRecruitingRequest,
-    KickParticipantRequest
+    KickParticipantRequest,
+    LeaveRecruitingRequest
 )
 from app.schemas.fcm_schemas import ChatPushNotification
 
@@ -396,3 +397,38 @@ class RecruitingChatService:
         await self.recruiting_repo.decrement_current_members(post_id)
 
         return {"message": "참여자가 성공적으로 강퇴되었습니다."}
+
+    async def leave_recruiting(self, post_id: int, leave_data: LeaveRecruitingRequest) -> Dict[str, str]:
+        """리크루팅 나가기 (채팅방 퇴장)"""
+        # 게시글 존재 확인
+        post = await self.recruiting_repo.get_recruiting_post_by_id(post_id)
+        if not post:
+            raise HTTPException(status_code=404, detail="해당 리크루팅 게시글을 찾을 수 없습니다.")
+
+        # 주최자는 나갈 수 없음
+        if str(post.get("user_id")) == str(leave_data.user_id):
+            raise HTTPException(status_code=400, detail="주최자는 리크루팅을 나갈 수 없습니다. 게시글을 삭제해주세요.")
+
+        # 채팅방 조회
+        chat_room = await self.recruiting_repo.get_chat_room_by_recruiting_post_id(post_id)
+        if not chat_room:
+            raise HTTPException(status_code=404, detail="해당 채팅방을 찾을 수 없습니다.")
+
+        # 참여자인지 확인
+        is_participant = await self.recruiting_repo.is_user_participant(
+            chat_room["id"], str(leave_data.user_id)
+        )
+        if not is_participant:
+            raise HTTPException(status_code=400, detail="참여 중인 리크루팅이 아닙니다.")
+
+        # 참여자 제거
+        success = await self.recruiting_repo.remove_participant(
+            chat_room["id"], str(leave_data.user_id)
+        )
+        if not success:
+            raise HTTPException(status_code=500, detail="나가기에 실패했습니다.")
+
+        # 현재 참여 인원 감소
+        await self.recruiting_repo.decrement_current_members(post_id)
+
+        return {"message": "리크루팅에서 성공적으로 나갔습니다."}
