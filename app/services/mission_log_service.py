@@ -7,6 +7,7 @@ from app.repository.mission_log_repository import MissionLogRepository
 from app.repository.mission_template_repository import MissionTemplateRepository
 from app.repository.point_log_repository import PointLogRepository
 from app.repository.user_repository import UserRepository
+from app.services.verification_service import VerificationService
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,7 @@ class MissionLogService:
         self.point_log_repo = PointLogRepository()
         self.user_repo = UserRepository()
         self.template_repo = MissionTemplateRepository()
+        self.verification_service = VerificationService()
 
     async def get_mission_logs_by_user(self, user_id: UUID) -> List[Dict[str, Any]]:
         """
@@ -122,10 +124,11 @@ class MissionLogService:
         proof_data: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         """
-        증빙 데이터 제출 및 상태 변경
+        증빙 데이터 제출 및 상태 변경 (+ AI 자동 검증)
 
         - 위치 인증: 바로 COMPLETED 처리 (검수 불필요)
         - 기타 인증: PENDING_VERIFICATION 상태로 변경 (Console에서 최종 승인)
+        - IMAGE/TEXT_REVIEW: success_criteria 기반 AI 자동 검증 수행
 
         Parameters:
         - log_id: 미션 로그 ID
@@ -163,6 +166,10 @@ class MissionLogService:
             # 기타 인증: 검수 대기
             new_status = "PENDING_VERIFICATION"
 
+        # AI 자동 검증 수행 (IMAGE, TEXT_REVIEW 타입만)
+        if new_status == "PENDING_VERIFICATION" and not has_error:
+            proof_data = await self._perform_ai_verification(current_log, proof_data)
+
         update_data = {
             "status": new_status,
             "proof_data": proof_data,
@@ -179,6 +186,62 @@ class MissionLogService:
             await self._award_points_for_completion(current_log)
 
         return await self.mission_log_repo.get_log_by_id(log_id)
+
+    async def _perform_ai_verification(
+        self,
+        current_log: Dict[str, Any],
+        proof_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        success_criteria 기반 AI 자동 검증 수행
+
+        Parameters:
+        - current_log: 현재 미션 로그
+        - proof_data: 증빙 데이터
+
+        Returns:
+        - verification_result가 추가된 proof_data
+        """
+        try:
+            # 미션 템플릿 정보 가져오기
+            template_id = current_log.get("mission_template_id")
+            if not template_id:
+                return proof_data
+
+            template = await self.template_repo.get_template_by_id(template_id)
+            if not template:
+                return proof_data
+
+            verification_type = template.get("verification_type", "")
+            success_criteria = template.get("success_criteria", "")
+            mission_title = template.get("title", "")
+
+            # AI 검증이 필요한 타입인지 확인
+            if verification_type not in ["IMAGE", "TEXT_REVIEW"]:
+                return proof_data
+
+            # success_criteria가 없으면 스킵
+            if not success_criteria:
+                return proof_data
+
+            # AI 검증 수행
+            logger.info(f"AI 검증 시작: log_id={current_log.get('id')}, type={verification_type}")
+            verification_result = await self.verification_service.verify_with_criteria(
+                verification_type=verification_type,
+                proof_data=proof_data,
+                success_criteria=success_criteria,
+                mission_title=mission_title
+            )
+
+            # 검증 결과를 proof_data에 추가
+            proof_data["verification_result"] = verification_result
+            logger.info(f"AI 검증 완료: is_valid={verification_result.get('is_valid')}, confidence={verification_result.get('confidence')}")
+
+        except Exception as e:
+            logger.error(f"AI 검증 중 오류 발생: {str(e)}", exc_info=True)
+            # 오류가 발생해도 기존 proof_data 반환 (검증 실패로 처리하지 않음)
+
+        return proof_data
 
     async def update_mission_log_status(
         self,

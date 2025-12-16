@@ -136,6 +136,17 @@ text_review_verification_schema = types.Schema(
     required=["is_valid", "confidence", "reason"],
 )
 
+# success_criteria 기반 미션 검증 스키마
+criteria_verification_schema = types.Schema(
+    type="object",
+    properties={
+        "is_valid": types.Schema(type="boolean", description="Does the submission meet the success criteria?"),
+        "confidence": types.Schema(type="number", description="Confidence level (0-1) of the verification"),
+        "reason": types.Schema(type="string", description="Detailed explanation in Korean for why the submission passed or failed"),
+    },
+    required=["is_valid", "confidence", "reason"],
+)
+
 
 class VerificationService:
     """인증(이미지, 퀴즈, 소감문) 관련 비즈니스 로직을 처리하는 서비스"""
@@ -421,3 +432,178 @@ class VerificationService:
             "verified_at": datetime.now().isoformat(),
             "location_address": location.get("location_address")
         }
+
+    async def verify_with_criteria(
+        self,
+        verification_type: str,
+        proof_data: Dict[str, Any],
+        success_criteria: str,
+        mission_title: str
+    ) -> Dict[str, Any]:
+        """
+        success_criteria를 기반으로 미션 제출물 자동 검증
+
+        Parameters:
+        - verification_type: 검증 타입 (IMAGE, TEXT_REVIEW, QUIZ, LOCATION)
+        - proof_data: 제출된 증빙 데이터
+        - success_criteria: 미션 성공 기준
+        - mission_title: 미션 제목
+
+        Returns:
+        - {is_valid, confidence, reason}
+        """
+        # success_criteria가 없으면 검증 스킵
+        if not success_criteria:
+            return {
+                "is_valid": True,
+                "confidence": 0.5,
+                "reason": "성공 기준이 설정되지 않아 자동 검증을 건너뜁니다."
+            }
+
+        # LOCATION, QUIZ는 이미 자동 검증되므로 스킵
+        if verification_type in ["LOCATION", "QUIZ"]:
+            return {
+                "is_valid": True,
+                "confidence": 1.0,
+                "reason": f"{verification_type} 타입은 별도 검증이 필요하지 않습니다."
+            }
+
+        try:
+            api_key = get_gemini_api_key()
+            client = genai.Client(api_key=api_key)
+
+            if verification_type == "IMAGE":
+                return await self._verify_image_with_criteria(
+                    client, proof_data, success_criteria, mission_title
+                )
+            elif verification_type == "TEXT_REVIEW":
+                return await self._verify_text_with_criteria(
+                    client, proof_data, success_criteria, mission_title
+                )
+            else:
+                return {
+                    "is_valid": True,
+                    "confidence": 0.5,
+                    "reason": f"알 수 없는 검증 타입입니다: {verification_type}"
+                }
+
+        except Exception as e:
+            # API 오류 시에도 검증 실패로 처리하지 않음 (참고용이므로)
+            return {
+                "is_valid": True,
+                "confidence": 0.0,
+                "reason": f"AI 검증 중 오류 발생: {str(e)}"
+            }
+
+    async def _verify_image_with_criteria(
+        self,
+        client: genai.Client,
+        proof_data: Dict[str, Any],
+        success_criteria: str,
+        mission_title: str
+    ) -> Dict[str, Any]:
+        """이미지를 success_criteria 기준으로 검증"""
+        import httpx
+
+        image_url = proof_data.get("imageUrl")
+        if not image_url:
+            return {
+                "is_valid": False,
+                "confidence": 1.0,
+                "reason": "이미지 URL이 없습니다."
+            }
+
+        # 이미지 다운로드
+        async with httpx.AsyncClient() as http_client:
+            response = await http_client.get(image_url)
+            if response.status_code != 200:
+                return {
+                    "is_valid": False,
+                    "confidence": 1.0,
+                    "reason": "이미지를 다운로드할 수 없습니다."
+                }
+            image_bytes = response.content
+
+        system_prompt = f"""
+        You are an AI mission reviewer for "zeroro", an environmental protection app.
+
+        **Mission**: "{mission_title}"
+        **Success Criteria**: "{success_criteria}"
+
+        **Your Task:**
+        Evaluate if the submitted image meets the success criteria.
+
+        **Evaluation Guidelines:**
+        1. Check if the image contains evidence related to the success criteria
+        2. Be reasonably lenient - genuine attempts should pass
+        3. Only reject if the image is clearly unrelated or fraudulent
+
+        **Important:**
+        - If the criteria mentions a specific action (e.g., "screenshot of app"), check for that
+        - If the criteria is vague, give benefit of the doubt
+        - Focus on whether the user made a genuine effort
+
+        Provide your response in JSON format with 'is_valid', 'confidence', and 'reason' (in Korean).
+        """
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
+                types.Part.from_bytes(
+                    data=image_bytes,
+                    mime_type="image/jpeg"
+                ),
+            ],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=criteria_verification_schema,
+                system_instruction=system_prompt
+            ),
+        )
+        return json.loads(response.text)
+
+    async def _verify_text_with_criteria(
+        self,
+        client: genai.Client,
+        proof_data: Dict[str, Any],
+        success_criteria: str,
+        mission_title: str
+    ) -> Dict[str, Any]:
+        """텍스트를 success_criteria 기준으로 검증"""
+        text = proof_data.get("text", "")
+        if not text:
+            return {
+                "is_valid": False,
+                "confidence": 1.0,
+                "reason": "텍스트가 없습니다."
+            }
+
+        system_prompt = f"""
+        You are an AI mission reviewer for "zeroro", an environmental protection app.
+
+        **Mission**: "{mission_title}"
+        **Success Criteria**: "{success_criteria}"
+        **Submitted Text**: "{text}"
+
+        **Your Task:**
+        Evaluate if the submitted text meets the success criteria.
+
+        **Evaluation Guidelines:**
+        1. Check if the text is related to the mission topic
+        2. Check if any length requirements in criteria are met
+        3. Verify it's not spam or random characters
+        4. Be lenient - genuine attempts should pass
+
+        Provide your response in JSON format with 'is_valid', 'confidence', and 'reason' (in Korean).
+        """
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=f"Please evaluate this text submission.",
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=criteria_verification_schema,
+                system_instruction=system_prompt
+            ),
+        )
+        return json.loads(response.text)
