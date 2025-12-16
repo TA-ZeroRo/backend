@@ -292,9 +292,7 @@ class PloggingService:
                             )
                             for p in route_points
                         ],
-                        created_at=datetime.fromisoformat(
-                            session["created_at"].replace("Z", "+00:00")
-                        )
+                        created_at=self._parse_timestamp(session["created_at"])
                     ))
 
         return MapRoutesResponse(
