@@ -34,14 +34,14 @@ app.add_middleware(
   allow_headers=["*"]      # 모든 HTTP 헤더 허용
 )
 
-@app.get("/")
-async def root():
-    return {
-        "message": "ZeroRo Backend API",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "redoc": "/redoc"
-    }
+# @app.get("/")
+# async def root():
+#     return {
+#         "message": "ZeroRo Backend API",
+#         "version": "1.0.0",
+#         "docs": "/docs",
+#         "redoc": "/redoc"
+#     }
 
 # API 라우터 확장
 app.include_router(router, prefix="/api/v1")
