@@ -124,12 +124,13 @@ class MissionLogService:
         """
         증빙 데이터 제출 및 상태 변경
 
-        모든 정상 제출은 PENDING_VERIFICATION 상태로 변경됩니다.
-        Console에서 관리자가 최종 승인/반려를 결정합니다.
+        - 위치 인증: 바로 COMPLETED 처리 (검수 불필요)
+        - 기타 인증: PENDING_VERIFICATION 상태로 변경 (Console에서 최종 승인)
 
         Parameters:
         - log_id: 미션 로그 ID
         - proof_data: 증빙 데이터
+          - verification_type: 인증 유형 ('location' = 위치 인증)
           - verification_result: AI 검증 결과 (is_valid, confidence, reason)
           - imageUrl, text 등: 실제 증빙 데이터
           - 오류 판단 기준: error, error_message, failed 필드가 있으면 FAILED
@@ -150,17 +151,33 @@ class MissionLogService:
             await self._update_log_or_raise(log_id, {"proof_data": proof_data})
             return await self.mission_log_repo.get_log_by_id(log_id)
 
-        # 상태 결정: 오류가 아니면 PENDING_VERIFICATION (Console 확인 필요)
-        # 포인트 지급은 Console에서 승인 시에만 수행
-        new_status = "FAILED" if has_error else "PENDING_VERIFICATION"
+        # 위치 인증은 바로 COMPLETED 처리 (검수 불필요)
+        is_location_verification = proof_data.get("verification_type") == "location"
+
+        if has_error:
+            new_status = "FAILED"
+        elif is_location_verification:
+            # 위치 인증: 바로 완료 처리
+            new_status = "COMPLETED"
+        else:
+            # 기타 인증: 검수 대기
+            new_status = "PENDING_VERIFICATION"
 
         update_data = {
             "status": new_status,
             "proof_data": proof_data,
         }
+
+        # COMPLETED 상태면 완료 시간 추가
+        if new_status == "COMPLETED":
+            update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
+
         await self._update_log_or_raise(log_id, update_data)
 
-        # PENDING_VERIFICATION은 포인트 지급 안 함 (Console 승인 시에만 지급)
+        # COMPLETED 상태면 포인트 지급
+        if new_status == "COMPLETED":
+            await self._award_points_for_completion(current_log)
+
         return await self.mission_log_repo.get_log_by_id(log_id)
 
     async def update_mission_log_status(
