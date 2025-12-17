@@ -11,6 +11,8 @@ class UserBase(BaseModel):
     total_points: Optional[int] = 0
     continuous_days: Optional[int] = 0
     characters: Optional[List[str]] = []
+    personalities: Optional[List[str]] = []
+    gacha_tickets: Optional[int] = 0
     last_active_at: Optional[datetime] = None
 
 
@@ -28,6 +30,8 @@ class UserUpdate(BaseModel):
     total_points: Optional[int] = None
     region: Optional[str] = None
     characters: Optional[List[str]] = None
+    personalities: Optional[List[str]] = None
+    gacha_tickets: Optional[int] = None
     last_active_at: Optional[datetime] = None
 
 

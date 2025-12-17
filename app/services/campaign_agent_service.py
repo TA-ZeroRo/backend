@@ -435,3 +435,67 @@ class CampaignAgentService:
                 "success": False,
                 "error": f"Failed to retry mission: {str(e)}"
             }
+
+    async def cancel_campaign(
+        self,
+        user_id: UUID,
+        campaign_id: int
+    ) -> Dict[str, Any]:
+        """
+        사용자의 캠페인 참가 취소 및 모든 미션 로그 삭제
+
+        Parameters:
+        -----------
+        user_id : UUID
+            사용자 ID
+        campaign_id : int
+            캠페인 ID
+
+        Returns:
+        --------
+        Dict[str, Any]
+            {
+                "success": True/False,
+                "campaign_id": 1,
+                "deleted_count": 3,
+                "message": "..."
+            }
+        """
+        try:
+            # 캠페인 존재 확인
+            campaign = await self.campaign_repo.get_campaign_by_id(campaign_id)
+            if not campaign:
+                logger.error(f"Campaign {campaign_id} not found")
+                return {
+                    "success": False,
+                    "error": "Campaign not found"
+                }
+
+            # 사용자의 캠페인 미션 로그 삭제
+            deleted_count = await self.mission_log_repo.delete_by_user_and_campaign(
+                user_id,
+                campaign_id
+            )
+
+            if deleted_count == 0:
+                logger.warning(f"No mission logs found for user {user_id} and campaign {campaign_id}")
+                return {
+                    "success": False,
+                    "error": "No active participation found"
+                }
+
+            logger.info(f"User {user_id} cancelled campaign {campaign_id}, deleted {deleted_count} mission logs")
+
+            return {
+                "success": True,
+                "campaign_id": campaign_id,
+                "deleted_count": deleted_count,
+                "message": f"Successfully cancelled campaign participation. {deleted_count} mission(s) deleted."
+            }
+
+        except Exception as e:
+            logger.error(f"Error cancelling campaign: {str(e)}", exc_info=True)
+            return {
+                "success": False,
+                "error": f"Failed to cancel campaign: {str(e)}"
+            }

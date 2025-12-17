@@ -37,6 +37,12 @@ class CampaignType(str, Enum):
     OFFLINE = "OFFLINE"  # 오프라인 캠페인 (특정 장소)
 
 
+class CampaignSource(str, Enum):
+    """캠페인 출처"""
+    ZERORO = "ZERORO"      # 제로로 자체 캠페인 (앱 내 미션 참여 가능)
+    EXTERNAL = "EXTERNAL"  # 외부 캠페인 (웹뷰 연결만 제공)
+
+
 # ===== Offline Campaign Location 스키마 =====
 class OfflineCampaignLocationBase(BaseModel):
     """오프라인 캠페인 위치 정보 기본 스키마"""
@@ -75,6 +81,7 @@ class CampaignResponse(BaseModel):
     status: CampaignStatus
     submission_type: Optional[SubmissionType] = None
     campaign_type: CampaignType = Field(CampaignType.ONLINE, description="캠페인 유형")
+    campaign_source: CampaignSource = Field(CampaignSource.EXTERNAL, description="캠페인 출처")
     updated_at: datetime
 
     # 오프라인 캠페인인 경우 위치 정보 포함

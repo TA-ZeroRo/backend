@@ -14,6 +14,14 @@ class ChatRequest(BaseModel):
     """AI 에이전트 대화 요청"""
     user_id: UUID = Field(..., description="사용자 ID")
     message: str = Field(..., description="사용자 메시지")
+    selected_character: Optional[str] = Field(
+        default="earth_zeroro",
+        description="선택된 캐릭터 ID (earth_zeroro: 지구 제로로, dust_zeroro: 먼지 제로로)"
+    )
+    selected_personality: Optional[str] = Field(
+        default="friendly",
+        description="선택된 성격 ID (friendly, playful, researcher, coach, elegant)"
+    )
 
     model_config = ConfigDict(
         from_attributes=True,

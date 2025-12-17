@@ -14,11 +14,11 @@ class RecruitingChatRepository(BaseRepository):
 
     # ===== RecruitingPost 관련 메서드 =====
     async def get_recruiting_post_by_id(self, post_id: int, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
-        """리크루팅 게시글 ID로 조회 (프로필 정보 포함)"""
+        """리크루팅 게시글 ID로 조회 (프로필 정보 및 캠페인 정보 포함)"""
         response = (
             self.supabase
             .table(self.RECRUITING_POST_TABLE)
-            .select("*, profiles(user_img, username)")
+            .select("*, profiles(user_img, username), campaigns(title, image_url)")
             .eq("id", post_id)
             .execute()
         )
@@ -54,11 +54,11 @@ class RecruitingChatRepository(BaseRepository):
         is_recruiting: Optional[bool] = None,
         user_id: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """페이지네이션 및 필터링이 적용된 리크루팅 게시글 조회"""
+        """페이지네이션 및 필터링이 적용된 리크루팅 게시글 조회 (캠페인 정보 포함)"""
         query = (
             self.supabase
             .table(self.RECRUITING_POST_TABLE)
-            .select("*, profiles(user_img, username)")
+            .select("*, profiles(user_img, username), campaigns(title, image_url)")
             .order("created_at", desc=True)
         )
 
@@ -127,11 +127,11 @@ class RecruitingChatRepository(BaseRepository):
 
         recruiting_post_ids = [r["recruiting_post_id"] for r in room_response.data]
 
-        # 3. 해당 리크루팅 게시글 조회
+        # 3. 해당 리크루팅 게시글 조회 (캠페인 정보 포함)
         query = (
             self.supabase
             .table(self.RECRUITING_POST_TABLE)
-            .select("*, profiles(user_img, username)")
+            .select("*, profiles(user_img, username), campaigns(title, image_url)")
             .in_("id", recruiting_post_ids)
             .order("created_at", desc=True)
             .range(offset, offset + limit - 1)
@@ -198,6 +198,24 @@ class RecruitingChatRepository(BaseRepository):
 
         # current_members 증가
         new_count = post["current_members"] + 1
+        response = (
+            self.supabase
+            .table(self.RECRUITING_POST_TABLE)
+            .update({"current_members": new_count})
+            .eq("id", post_id)
+            .execute()
+        )
+        return response.data is not None
+
+    async def decrement_current_members(self, post_id: int) -> bool:
+        """현재 참여 인원 감소"""
+        # 현재 게시글 조회
+        post = await self.get_recruiting_post_by_id(post_id)
+        if not post:
+            return False
+
+        # current_members 감소 (최소 0)
+        new_count = max(0, post["current_members"] - 1)
         response = (
             self.supabase
             .table(self.RECRUITING_POST_TABLE)
@@ -278,6 +296,21 @@ class RecruitingChatRepository(BaseRepository):
             .execute()
         )
         return response.data is not None and len(response.data) > 0
+
+    async def remove_participant(self, chat_room_id: int, user_id: str) -> bool:
+        """채팅방에서 참여자 제거 (강퇴)"""
+        try:
+            response = (
+                self.supabase
+                .table(self.PARTICIPANT_TABLE)
+                .delete()
+                .eq("chat_room_id", chat_room_id)
+                .eq("user_id", user_id)
+                .execute()
+            )
+            return response.data is not None and len(response.data) > 0
+        except Exception:
+            return False
 
     async def get_participants_by_room_id(self, chat_room_id: int) -> List[Dict[str, Any]]:
         """채팅방 참여자 목록 조회 (프로필 정보 포함)"""
